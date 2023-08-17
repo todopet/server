@@ -1,9 +1,10 @@
-import mongoose from "mongoose";
+import { Schema } from "mongoose";
 
-const userSchema = new mongoose.Schema(
+const userSchema = new Schema(
     {
         nickname: {
             type: String,
+            unique: true,
             required: true
         },
         membershipStatus: {
@@ -12,6 +13,15 @@ const userSchema = new mongoose.Schema(
             default: "active",
             required: true
         },
+        googleId: {
+            type: String,
+            unique: true,
+            required: true
+        },
+        picture: {
+            type: String,
+            required: true
+        }
     },
     {
         timestamps: true

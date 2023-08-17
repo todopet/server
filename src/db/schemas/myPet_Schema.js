@@ -1,6 +1,6 @@
-import mongoose from "mongoose";
+import { Schema } from "mongoose";
 
-const myPetSchema = new mongoose.Schema(
+const myPetSchema = new Schema(
     {
         user: {
             type: mongoose.Schema.Types.ObjectId,

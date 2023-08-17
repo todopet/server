@@ -1,6 +1,6 @@
-import mongoose from "mongoose";
+import { Schema } from "mongoose";
 
-const inventorySchema = new mongoose.Schema(
+const inventorySchema = new Schema(
     {
         user: {
             type: mongoose.Schema.Types.ObjectId,
