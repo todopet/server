@@ -1,7 +1,7 @@
-import mongoose from "mongoose";
+import { Schema } from "mongoose";
 import todoContentSchema from "./todoContent_Schema.js";
 
-const todoCategorySchema = new mongoose.Schema(
+const todoCategorySchema = new Schema(
     {
         userId: {
             type: mongoose.Schema.Types.ObjectId,
