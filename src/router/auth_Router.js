@@ -1,5 +1,5 @@
 import { Router } from "express";
-import UserService from "../service/user_Service";
+import UserService from "../service/user_Service.js";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import axios from "axios";
@@ -16,8 +16,7 @@ const GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token";
 const GOOGLE_USERINFO_URL = "https://www.googleapis.com/oauth2/v2/userinfo";
 const PORT = process.env.PORT;
 
-//const authService = new AuthService();
-
+//const userService = new UserService();
 
 authRouter.use(cookieParser());
 
@@ -30,7 +29,7 @@ authRouter.get("/", (req, res) => {
 });
 
 //로그인
-authRouter.get("/login", (req, res) => {
+authRouter.get("/api/login", (req, res) => {
     res.redirect(
         `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${GOOGLE_LOGIN_REDIRECT_URI}&response_type=code&scope=email profile`
     );
@@ -91,10 +90,10 @@ authRouter.get("/signup/redirect", async (req, res) => {
             Authorization: `Bearer ${resp.data.access_token}`
         }
     });
-
+    console.log(resp2.data.id);
     const userService = new UserService();
     const newUser = await userService.addUser(resp2.data);
-    res.json(newUser);
+    res.status(201).json({ result: "success " });
 });
 
 export default authRouter;

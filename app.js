@@ -28,7 +28,7 @@ app.use(express.urlencoded({ extended: false }));
 //정적 파일 제공
 //app.use(express.static(path.join(__dirname, "public")));
 
-app.use("/api", authRouter);
+app.use("/", authRouter);
 
 app.listen(PORT, function () {
     console.log(`서버가 ${PORT}에서 실행 중....`);

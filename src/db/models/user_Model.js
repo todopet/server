@@ -1,38 +1,38 @@
 import { model } from "mongoose";
-import userSchema from '../schemas/user_Schema';
+import userSchema from "../schemas/user_Schema.js";
 
-const User = model('users', userSchema);
+const User = model("users", userSchema);
 
-class userModel {
-  constructor() {
-    this.userProjection = { password: 0, __v: 0 };
-  }
+class UserModel {
+    constructor() {
+        this.userProjection = { password: 0, __v: 0 };
+    }
 
-  async create(newUser) {
-    const createNewUser = await User.create(newUser);
-    return createNewUser;
-  }
+    async create(newUser) {
+        const createNewUser = await User.create(newUser);
+        return createNewUser;
+    }
 
-  async findAll() {
-    const users = await User.find({}, this.userProjection);
-    return users;
-  }
+    async findAll() {
+        const users = await User.find({}, this.userProjection);
+        return users;
+    }
 
-  async findByGoogleId() {
-    const user = await User.findOne({ googleId });
-    return user;
-  }
+    async findByGoogleId(googleId) {
+        const user = await User.findOne({ googleId });
+        return user;
+    }
 
-  async update({ userId, update }) {
-    const filter = { _id: userId };
-    const option = {
-      returnOriginal: false,
-      select: this.userProjection,
-    };
+    async update({ userId, update }) {
+        const filter = { _id: userId };
+        const option = {
+            returnOriginal: false,
+            select: this.userProjection
+        };
 
-    const updatedUser = await User.findOneAndUpdate(filter, update, option);
-    return updatedUser;
-  }
+        const updatedUser = await User.findOneAndUpdate(filter, update, option);
+        return updatedUser;
+    }
 }
 
-export default userModel;
+export default UserModel;
