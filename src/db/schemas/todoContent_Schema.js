@@ -3,7 +3,7 @@ import { Schema } from "mongoose";
 const todoContentSchema = new Schema(
     {
         userId: {
-            type: mongoose.Schema.Types.ObjectId,
+            type: Schema.Types.ObjectId,
             ref: "User",
             required: true
         },
@@ -16,7 +16,10 @@ const todoContentSchema = new Schema(
             enum: ["pending", "completed"],
             default: "pending"
         },
-        
+        completed: {
+            type: Boolean,
+            default: false
+        }
     },
     {
         timestamps: true
