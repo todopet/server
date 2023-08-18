@@ -1,4 +1,4 @@
-import UserModel from "../db/models/user_Model.js";
+import { UserModel } from "../db/models/index.js";
 
 class UserService {
     constructor() {

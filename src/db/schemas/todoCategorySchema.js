@@ -1,5 +1,5 @@
 import { Schema } from "mongoose";
-import todoContentSchema from "./todoContent_Schema.js";
+import todoContentSchema from "./todoContentSchema.js";
 
 const todoCategorySchema = new Schema(
     {

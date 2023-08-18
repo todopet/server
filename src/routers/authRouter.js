@@ -1,5 +1,5 @@
 import { Router } from "express";
-import UserService from "../service/user_Service.js";
+import UserService from "../services/userService.js";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import axios from "axios";
