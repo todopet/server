@@ -2,6 +2,11 @@ import { Schema } from "mongoose";
 
 const userSchema = new Schema(
     {
+        googleId: {
+            type: String,
+            unique: true,
+            required: true
+        },
         nickname: {
             type: String,
             unique: true,
@@ -11,11 +16,6 @@ const userSchema = new Schema(
             type: String,
             enum: ["active", "withdrawn", "suspended"],
             default: "active",
-            required: true
-        },
-        googleId: {
-            type: String,
-            unique: true,
             required: true
         },
         picture: {
