@@ -3,15 +3,17 @@ import UserService from "../service/user_Service.js";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import axios from "axios";
-//import jwt from "../utils/jwt.js";
+import asyncHandler from "../middlewares/asnycHandler.js";
+import userAuthorization from "../middlewares/userAuthorization.js";
+import jwt from "../utils/jwt.js";
 
 dotenv.config();
 const authRouter = Router();
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
-const GOOGLE_LOGIN_REDIRECT_URI = "http://localhost:3000/login/redirect";
-const GOOGLE_SIGNUP_REDIRECT_URI = "http://localhost:3000/signup/redirect";
+const GOOGLE_LOGIN_REDIRECT_URI = "http://localhost:3001/login/redirect";
+const GOOGLE_SIGNUP_REDIRECT_URI = "http://localhost:3001/signup/redirect";
 const GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token";
 const GOOGLE_USERINFO_URL = "https://www.googleapis.com/oauth2/v2/userinfo";
 const PORT = process.env.PORT;
@@ -25,11 +27,12 @@ authRouter.get("/", (req, res) => {
   <h1>OAuth</h1>
   <a href="/login">Log in<a>
   <a href="/signup">Sign up</a>
+  <a href="/withdraw">회원 탈퇴</a>
   `);
 });
 
 //로그인
-authRouter.get("/api/login", (req, res) => {
+authRouter.get("/login", (req, res) => {
     res.redirect(
         `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${GOOGLE_LOGIN_REDIRECT_URI}&response_type=code&scope=email profile`
     );
@@ -46,24 +49,38 @@ authRouter.get("/api/login", (req, res) => {
     // res.redirect(url);
 });
 
-authRouter.get("/login/redirect", async (req, res) => {
-    const { code } = req.query;
-    console.log(`code: ${code}`);
+authRouter.get(
+    "/login/redirect",
+    asyncHandler(async (req, res) => {
+        const { code } = req.query;
 
-    const resp = await axios.post(GOOGLE_TOKEN_URL, {
-        code,
-        client_id: GOOGLE_CLIENT_ID,
-        client_secret: GOOGLE_CLIENT_SECRET,
-        redirect_uri: GOOGLE_LOGIN_REDIRECT_URI,
-        grant_type: "authorization_code"
-    });
-    const resp2 = await axios.get(GOOGLE_USERINFO_URL, {
-        headers: {
-            Authorization: `Bearer ${resp.data.access_token}`
+        const resp = await axios.post(GOOGLE_TOKEN_URL, {
+            code,
+            client_id: GOOGLE_CLIENT_ID,
+            client_secret: GOOGLE_CLIENT_SECRET,
+            redirect_uri: GOOGLE_LOGIN_REDIRECT_URI,
+            grant_type: "authorization_code"
+        });
+        const resp2 = await axios.get(GOOGLE_USERINFO_URL, {
+            headers: {
+                Authorization: `Bearer ${resp.data.access_token}`
+            }
+        });
+
+        const userService = new UserService();
+        let user = await userService.findByGoogleId(resp2.data.id); // 이미 가입된 유저 찾기
+        console.log(resp2.data.id);
+        if (!user) {
+            // 새로운 유저인 경우, 회원가입 처리
+            user = await userService.addUser(resp2.data); // 회원 정보 추가 및 가져오기
         }
-    });
-    res.json(resp2.data);
-});
+
+        const token = jwt.sign(user._id); // 토큰 발급
+
+        res.cookie("token", token); // 클라이언트에게 토큰 전달
+        res.redirect("/"); // 루트 페이지로 리다이렉트
+    })
+);
 
 //회원가입
 authRouter.get("/signup", (req, res) => {
@@ -73,27 +90,48 @@ authRouter.get("/signup", (req, res) => {
 });
 
 //구글에 토큰 요청 및 회원 등록
-authRouter.get("/signup/redirect", async (req, res) => {
-    const { code } = req.query;
-    console.log(`code: ${code}`);
+authRouter.get(
+    "/signup/redirect",
+    asyncHandler(async (req, res) => {
+        const { code } = req.query;
 
-    //access_token, refresh_token 등의 구글 토큰 정보 가져오기
-    const resp = await axios.post(GOOGLE_TOKEN_URL, {
-        code,
-        client_id: GOOGLE_CLIENT_ID,
-        client_secret: GOOGLE_CLIENT_SECRET,
-        redirect_uri: GOOGLE_SIGNUP_REDIRECT_URI,
-        grant_type: "authorization_code"
-    });
-    const resp2 = await axios.get(GOOGLE_USERINFO_URL, {
-        headers: {
-            Authorization: `Bearer ${resp.data.access_token}`
+        const resp = await axios.post(GOOGLE_TOKEN_URL, {
+            code,
+            client_id: GOOGLE_CLIENT_ID,
+            client_secret: GOOGLE_CLIENT_SECRET,
+            redirect_uri: GOOGLE_SIGNUP_REDIRECT_URI,
+            grant_type: "authorization_code"
+        });
+        const resp2 = await axios.get(GOOGLE_USERINFO_URL, {
+            headers: {
+                Authorization: `Bearer ${resp.data.access_token}`
+            }
+        });
+
+        const userService = new UserService();
+        const user = await userService.addUser(resp2.data); // 회원 정보 추가 및 가져오기
+        const token = jwt.sign(user._id); // 토큰 발급
+
+        res.cookie("token", token); // 클라이언트에게 토큰 전달
+        res.redirect("/"); // 루트 페이지로 리다이렉트
+    })
+);
+
+//회원탈퇴
+authRouter.get(
+    "/withdraw",
+    userAuthorization,
+    asyncHandler(async (req, res) => {
+        const userId = req.currentUserId;
+
+        const userService = new UserService();
+        try {
+            await userService.withdrawUser(userId); // 회원 탈퇴 처리
+            res.status(200).json({ message: "Withdrawal successful" });
+        } catch (error) {
+            res.status(500).json({ error: "Failed to withdraw user" });
         }
-    });
-    console.log(resp2.data.id);
-    const userService = new UserService();
-    const newUser = await userService.addUser(resp2.data);
-    res.status(201).json({ result: "success " });
-});
+    })
+);
 
 export default authRouter;
