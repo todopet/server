@@ -7,6 +7,7 @@ import mongoose from "mongoose";
 import authRouter from "./src/router/auth_Router.js";
 import cookieParser from "cookie-parser";
 import axios from "axios";
+import { v1 } from "./src/router/index.js";
 
 const app = express();
 const { PORT, DB_URL } = process.env;
@@ -28,6 +29,8 @@ app.use(express.urlencoded({ extended: false }));
 //정적 파일 제공
 //app.use(express.static(path.join(__dirname, "public")));
 
+// version 1의 api router 등록
+app.use("/api/v1", v1);
 app.use("/", authRouter);
 
 app.listen(PORT, function () {

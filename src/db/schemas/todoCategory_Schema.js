@@ -4,7 +4,7 @@ import todoContentSchema from "./todoContent_Schema.js";
 const todoCategorySchema = new Schema(
     {
         userId: {
-            type: mongoose.Schema.Types.ObjectId,
+            type: Schema.Types.ObjectId,
             ref: "User",
             required: true
         },
