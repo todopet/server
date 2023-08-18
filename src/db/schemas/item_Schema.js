@@ -1,24 +1,23 @@
-import mongoose from "mongoose";
+import { Schema } from "mongoose";
 
-class Item {
-    constructor() {
-        const itemSchema = new mongoose.Schema(
-            {
-                name: {
-                    type: String,
-                    required: true
-                },
-                description: {
-                    type: String,
-                    required: true
-                },
-            },
-            {
-                timestamps: true
-            }
-        );
-        return mongoose.model("Item", itemSchema);
+const itemSchema = new Schema(
+    {
+        itemName: {
+            type: String,
+            required: true
+        },
+        description: {
+            type: String,
+            required: true
+        },
+        effect: {
+            type: Number,
+            required: true
+        }
+    },
+    {
+        timestamps: true
     }
-}
+);
 
-export default new Item();
+export default itemSchema;
