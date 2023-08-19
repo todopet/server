@@ -5,6 +5,8 @@ import petSchema from "./petSchema.js";
 import todoCategorySchema from "./todoCategorySchema.js";
 import todoContentSchema from "./todoContentSchema.js";
 import userSchema from "./userSchema.js";
+import historySchema from "./historySchema.js";
+import achieveSchema from "./achieveSchema.js";
 
 export {
     inventorySchema,
@@ -13,5 +15,7 @@ export {
     petSchema,
     todoCategorySchema,
     todoContentSchema,
-    userSchema
+    userSchema,
+    historySchema,
+    achieveSchema
 };
