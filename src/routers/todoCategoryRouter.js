@@ -9,12 +9,13 @@ const todoCategoryService = new TodoCategoryService();
 // TODO 유저에 대한 카테고리 전체 조회
 // TODO 특정 카테고리 조회
 todoCategoryRouter.get(
-    "/categories/:userId",
+    "/:id?",
     asyncHandler(async (req, res, next) => {
-        const { userId } = req.params;
-        const { categoryId } = req.query;
-        const category = categoryId
-            ? await todoCategoryService.getCategory(categoryId)
+        const userId = "64de2fbf9a951f54beeff3ff";
+        // const { userId } = req.currentUserId;
+        const { id } = req.params;
+        const category = id
+            ? await todoCategoryService.getCategory(id)
             : await todoCategoryService.getCategories(userId);
         res.json(buildResponse(category));
     })
@@ -22,11 +23,11 @@ todoCategoryRouter.get(
 
 // TODO 카테고리 저장
 todoCategoryRouter.post(
-    "/categories",
+    "/",
     asyncHandler(async (req, res, next) => {
-        // userId 추가 필요. 어떻게?
-        const { category } = req.body;
-        const userId = "64de2c8e7df86d5fccd36ddd";
+        // const userId = "64de2fbf9a951f54beeff3ff";
+        // const { userId } = req.currentUserId;
+        const { userId, category } = req.body;
         const result = await todoCategoryService.addCategory({
             userId,
             category
@@ -37,21 +38,18 @@ todoCategoryRouter.post(
 
 // TODO 카테고리 수정
 todoCategoryRouter.patch(
-    "/categories/:categoryId",
+    "/:id",
     asyncHandler(async (req, res, next) => {
-        const { categoryId } = req.params;
+        const { id } = req.params;
         const { category } = req.body;
-        const result = await todoCategoryService.updateCategory(
-            categoryId,
-            category
-        );
+        const result = await todoCategoryService.updateCategory(id, category);
         res.json(buildResponse(result));
     })
 );
 
 // TODO 카테고리 삭제
 todoCategoryRouter.delete(
-    "/categories/:id",
+    "/:id",
     asyncHandler(async (req, res, next) => {
         const { id } = req.params;
         const result = await todoCategoryService.deleteCategory(id);
