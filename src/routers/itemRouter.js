@@ -6,4 +6,78 @@ import asyncHandler from "../middlewares/asnycHandler.js";
 const itemRouter = Router();
 const itemService = new ItemService();
 
+itemRouter.get("/");
+
+itemRouter.get(
+    "/:id",
+    asyncHandler(async (req, res, next) => {
+        const { id } = req.params;
+        const result = await itemService.getItem(id);
+        res.json(buildResponse(result));
+    })
+);
+
+// TODO 카테고리 저장
+itemRouter.post(
+    "/",
+    asyncHandler(async (req, res, next) => {
+        const {
+            itemName,
+            description,
+            image,
+            status,
+            effect,
+            exp,
+            probability
+        } = req.body;
+        const result = await itemService.addItem({
+            itemName,
+            description,
+            image,
+            status,
+            effect,
+            exp,
+            probability
+        });
+        res.json(buildResponse(result));
+    })
+);
+
+// TODO 카테고리 수정
+itemRouter.patch(
+    "/:id",
+    asyncHandler(async (req, res, next) => {
+        const { id } = req.params;
+        const {
+            itemName,
+            description,
+            image,
+            status,
+            effect,
+            exp,
+            probability
+        } = req.body;
+        const result = await itemService.updateItem(id, {
+            itemName,
+            description,
+            image,
+            status,
+            effect,
+            exp,
+            probability
+        });
+        res.json(buildResponse(result));
+    })
+);
+
+// TODO 카테고리 삭제
+itemRouter.delete(
+    "/:id",
+    asyncHandler(async (req, res, next) => {
+        const { id } = req.params;
+        const result = await itemService.deleteItem(id);
+        res.json(buildResponse(result));
+    })
+);
+
 export default itemRouter;
