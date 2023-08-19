@@ -1,8 +1,9 @@
-import { TodoContentModel } from "../db/models/index.js";
+import { TodoContentModel, TodoCategoryModel } from "../db/models/index.js";
 
 class TodoContentService {
     constructor() {
         this.todoContentModel = new TodoContentModel();
+        this.todoCategoryModel = new TodoCategoryModel();
     }
     async getContents() {
         return await this.todoContentModel.find();
@@ -10,14 +11,19 @@ class TodoContentService {
     async getContent(id) {
         return await this.todoContentModel.findById(id);
     }
-    async addContent(category) {
-        return await this.todoContentModel.create(category);
+
+    // 개발시작
+    async addContent(content) {
+        return await this.todoContentModel.create(content);
+        // return await this.todoContentModel.create(id, content);
     }
-    async updateContent(id, category) {
-        return await this.todoContentModel.update(id, category);
+
+    async updateContent(content) {
+        return await this.todoContentModel.update(content);
     }
-    async deleteContent(id) {
-        return await this.todoContentModel.delete(id);
+    async deleteContent(categoryId, contentId) {
+        console.log("services");
+        return await this.todoContentModel.delete(categoryId, contentId);
     }
 }
 
