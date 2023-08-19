@@ -10,22 +10,27 @@ const petSchema = new Schema(
             type: Number,
             default: 0
         },
+        // 경험치
         exp: {
             type: Number,
             default: 0
         },
+        // 포만감
         hunger: {
             type: Number,
             default: 100
         },
+        // 친밀도
         affection: {
             type: Number,
             default: 100
         },
+        // 청결도
         cleanliness: {
             type: Number,
             default: 100
         },
+        // 컨디션
         condition: {
             type: Number,
             default: 100
