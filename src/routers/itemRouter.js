@@ -6,8 +6,7 @@ import asyncHandler from "../middlewares/asnycHandler.js";
 const itemRouter = Router();
 const itemService = new ItemService();
 
-itemRouter.get("/");
-
+// item 조회
 itemRouter.get(
     "/:id",
     asyncHandler(async (req, res, next) => {
@@ -17,7 +16,7 @@ itemRouter.get(
     })
 );
 
-// TODO 카테고리 저장
+// item 저장
 itemRouter.post(
     "/",
     asyncHandler(async (req, res, next) => {
@@ -43,7 +42,7 @@ itemRouter.post(
     })
 );
 
-// TODO 카테고리 수정
+// item 수정
 itemRouter.patch(
     "/:id",
     asyncHandler(async (req, res, next) => {
@@ -70,7 +69,7 @@ itemRouter.patch(
     })
 );
 
-// TODO 카테고리 삭제
+// item 삭제
 itemRouter.delete(
     "/:id",
     asyncHandler(async (req, res, next) => {
