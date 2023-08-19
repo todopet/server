@@ -4,10 +4,9 @@ dotenv.config();
 import cors from "cors";
 import path from "path";
 import mongoose from "mongoose";
-import authRouter from "./src/router/auth_Router.js";
 import cookieParser from "cookie-parser";
 import axios from "axios";
-import { v1 } from "./src/router/index.js";
+import { v1 } from "./src/routers/index.js";
 
 const app = express();
 const { PORT, DB_URL } = process.env;
@@ -31,7 +30,6 @@ app.use(express.urlencoded({ extended: false }));
 
 // version 1의 api router 등록
 app.use("/api/v1", v1);
-app.use("/", authRouter);
 
 app.listen(PORT, function () {
     console.log(`서버가 ${PORT}에서 실행 중....`);
