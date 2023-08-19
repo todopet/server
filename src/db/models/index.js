@@ -5,6 +5,8 @@ import ItemModel from "./itemModel.js";
 import PetModel from "./petModel.js";
 import MyPetModel from "./myPetModel.js";
 import InventoryModel from "./inventoryModel.js";
+import AcheiveModel from "./achieveModel.js";
+import HistoryModel from "./historyModel.js";
 
 export {
     UserModel,
@@ -13,5 +15,7 @@ export {
     ItemModel,
     PetModel,
     MyPetModel,
-    InventoryModel
+    InventoryModel,
+    AcheiveModel,
+    HistoryModel
 };
