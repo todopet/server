@@ -21,11 +21,17 @@ todoContentRouter.get(
 
 // TODO 계획(todo) 저장
 todoContentRouter.post(
-    "/contents",
+    "/:categoryId",
     asyncHandler(async (req, res, next) => {
-        const { content } = req.body;
+        const userId = "64de2fbf9a951f54beeff3ff";
+        // const { userId } = req.currentUserId;
+
+        const { categoryId } = req.params;
+        const { todo } = req.body;
         const result = await todoContentService.addContent({
-            content
+            userId,
+            categoryId,
+            todo
         });
         res.json(buildResponse(result));
     })
@@ -33,23 +39,42 @@ todoContentRouter.post(
 
 // TODO 계획(todo) 수정 - 계획 처리
 todoContentRouter.patch(
-    "/contents/:id",
+    "/:categoryId",
     asyncHandler(async (req, res, next) => {
-        const { id } = req.params;
+        const userId = "64de2fbf9a951f54beeff3ff";
+        // const { userId } = req.currentUserId;
+
+        const { categoryId } = req.params;
+        const { contentId, todo, status } = req.body;
         // content, status...
         // 처리하면 상태 변화 해줘야 함 그리고 보상 줘야함
         // 처리한걸 취소하고 다시 체크하면 보상 주면 안됨
-        const result = await todoContentService.updateContent(id, content);
+        const response = await todoContentService.updateContent({
+            userId,
+            categoryId,
+            contentId,
+            todo,
+            status
+        });
+        const result = response.todos.find(
+            (item) => item._id.toString() === contentId
+        );
         res.json(buildResponse(result));
     })
 );
 
 // TODO 계획(todo) 삭제
 todoContentRouter.delete(
-    "/contents/:id",
+    "/:categoryId",
     asyncHandler(async (req, res, next) => {
-        const { id } = req.params;
-        const result = await todoContentService.deleteContent(id);
+        const { categoryId } = req.params;
+        const { contentId } = req.body;
+        console.log("router");
+        const result = await todoContentService.deleteContent(
+            categoryId,
+            contentId
+        );
+        console.log(result);
         res.json(buildResponse(result));
     })
 );
