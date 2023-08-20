@@ -4,6 +4,9 @@ class PetService {
     constructor() {
         this.petModel = new PetModel();
     }
+    async getLowestLevel() {
+        return await this.petModel.findLowestLevel();
+    }
     async getPet(id) {
         return await this.petModel.find(id);
     }
