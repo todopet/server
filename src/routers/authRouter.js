@@ -1,5 +1,6 @@
 import { Router } from "express";
 import UserService from "../services/userService.js";
+import InventoryService from '../services/inventoryService.js';
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import axios from "axios";
@@ -12,8 +13,9 @@ const authRouter = Router();
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
-const GOOGLE_LOGIN_REDIRECT_URI = "http://localhost:3001/login/redirect";
-const GOOGLE_SIGNUP_REDIRECT_URI = "http://localhost:3001/signup/redirect";
+const GOOGLE_LOGIN_REDIRECT_URI = "http://localhost:3001/api/v1/login/redirect";
+const GOOGLE_SIGNUP_REDIRECT_URI =
+    "http://localhost:3001/api/v1/signup/redirect";
 const GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token";
 const GOOGLE_USERINFO_URL = "https://www.googleapis.com/oauth2/v2/userinfo";
 const PORT = process.env.PORT;
@@ -25,9 +27,9 @@ authRouter.use(cookieParser());
 authRouter.get("/", (req, res) => {
     res.send(`
   <h1>OAuth</h1>
-  <a href="/login">Log in<a>
-  <a href="/signup">Sign up</a>
-  <a href="/withdraw">회원 탈퇴</a>
+  <a href="/api/v1/login">Log in<a>
+  <a href="/api/v1/signup">Sign up</a>
+  <a href="/api/v1/withdraw">회원 탈퇴</a>
   `);
 });
 
@@ -68,17 +70,19 @@ authRouter.get(
         });
 
         const userService = new UserService();
-        let user = await userService.findByGoogleId(resp2.data.id); // 이미 가입된 유저 찾기
-        console.log(resp2.data.id);
+        let user = await userService.findByGoogleId(resp2.data.id);
+
         if (!user) {
-            // 새로운 유저인 경우, 회원가입 처리
-            user = await userService.addUser(resp2.data); // 회원 정보 추가 및 가져오기
+            user = await userService.addUser(resp2.data);
+            // 수정된 부분: inventoryService.addInventory 호출로 변경
+            const inventoryService = new InventoryService();
+            await inventoryService.addInventory(user._id, []);
         }
 
-        const token = jwt.sign(user._id); // 토큰 발급
+        const token = jwt.sign(user._id);
 
-        res.cookie("token", token); // 클라이언트에게 토큰 전달
-        res.redirect("/"); // 루트 페이지로 리다이렉트
+        res.cookie("token", token);
+        res.redirect("/api/v1");
     })
 );
 
@@ -110,10 +114,11 @@ authRouter.get(
 
         const userService = new UserService();
         const user = await userService.addUser(resp2.data); // 회원 정보 추가 및 가져오기
-        const token = jwt.sign(user._id); // 토큰 발급
+        // 여기서 user._id를 문자열로 변환하여 전달
+        const token = jwt.sign(user._id.toString()); // 토큰 발급
 
         res.cookie("token", token); // 클라이언트에게 토큰 전달
-        res.redirect("/"); // 루트 페이지로 리다이렉트
+        res.redirect("/api/v1"); // 루트 페이지로 리다이렉트
     })
 );
 

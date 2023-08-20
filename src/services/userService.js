@@ -1,8 +1,10 @@
 import { UserModel } from "../db/models/index.js";
+import InventoryService from "./inventoryService.js";
 
 class UserService {
     constructor() {
         this.userModel = new UserModel();
+        this.inventoryService = new InventoryService();
     }
     async addUser(userInfo) {
         const { googleId, picture } = userInfo;
@@ -10,7 +12,7 @@ class UserService {
         const user = await this.userModel.findByGoogleId(googleId);
         if (user) {
             if (user.membershipStatus === "withdrawn") {
-                await this.userModel.updateMembershipStatus(user._id, "active");
+                await this.updateMembershipStatus(user._id, "active");
                 return "Signup Success (Membership Restored)";
             } else {
                 throw new Error("이미 가입되어있는 아이디입니다.");
@@ -23,7 +25,11 @@ class UserService {
             nickname: userInfo.name
         };
         const createdNewUser = await this.userModel.create(newUserInfo);
-        return "Signup Success";
+
+        const inventoryService = new InventoryService();
+        await inventoryService.addInventory(createdNewUser._id, []);
+
+        return createdNewUser; // 사용자 정보 반환
     }
 
     async findUserById(userId) {
@@ -45,7 +51,7 @@ class UserService {
     }
 
     async withdrawUser(userId) {
-        const updateResult = await this.userModel.updateMembershipStatus(
+        const updateResult = await this.updateMembershipStatus(
             userId,
             "withdrawn"
         );
