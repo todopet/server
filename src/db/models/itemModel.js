@@ -5,7 +5,7 @@ const Item = model("items", itemSchema);
 
 class ItemModel {
     async findById(id) {
-        return await Item.findById(id).lean();
+        return await Item.findById(id);
     }
     async create(item) {
         return (await Item.create(item)).toObject();

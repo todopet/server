@@ -21,21 +21,21 @@ itemRouter.post(
     "/",
     asyncHandler(async (req, res, next) => {
         const {
-            itemName,
+            name,
             description,
             image,
             status,
             effect,
-            exp,
+            experience,
             probability
         } = req.body;
         const result = await itemService.addItem({
-            itemName,
+            name,
             description,
             image,
             status,
             effect,
-            exp,
+            experience,
             probability
         });
         res.json(buildResponse(result));
@@ -48,21 +48,21 @@ itemRouter.patch(
     asyncHandler(async (req, res, next) => {
         const { id } = req.params;
         const {
-            itemName,
+            name,
             description,
             image,
             status,
             effect,
-            exp,
+            experience,
             probability
         } = req.body;
         const result = await itemService.updateItem(id, {
-            itemName,
+            name,
             description,
             image,
             status,
             effect,
-            exp,
+            experience,
             probability
         });
         res.json(buildResponse(result));
