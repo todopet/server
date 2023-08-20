@@ -1,22 +1,21 @@
 import { Schema } from "mongoose";
-import todoContentSchema from "./todoContent_Schema.js";
 
-const todoCategorySchema = new Schema(
+const historySchema = new Schema(
     {
         userId: {
             type: Schema.Types.ObjectId,
             ref: "User",
             required: true
         },
-        category: {
+        // 업적 id 또는 todo id가 될 수 있다.
+        contentId: {
             type: String,
             required: true
-        },
-        todos: [todoContentSchema]
+        }
     },
     {
         timestamps: true
     }
 );
 
-export default todoCategorySchema;
+export default historySchema;

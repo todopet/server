@@ -3,11 +3,16 @@ import { Schema } from "mongoose";
 const todoContentSchema = new Schema(
     {
         userId: {
-            type: Schema.Types.ObjectId,
-            ref: "User",
+            type: String,
+            // type: Schema.Types.ObjectId,
+            // ref: "User",
             required: true
         },
-        content: {
+        categoryId: {
+            type: String,
+            required: true
+        },
+        todo: {
             type: String,
             required: true
         },
@@ -15,10 +20,6 @@ const todoContentSchema = new Schema(
             type: String,
             enum: ["pending", "completed"],
             default: "pending"
-        },
-        completed: {
-            type: Boolean,
-            default: false
         }
     },
     {
