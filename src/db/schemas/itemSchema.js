@@ -3,7 +3,7 @@ import { Schema } from "mongoose";
 const itemSchema = new Schema(
     {
         // 아이템 이름
-        itemName: {
+        name: {
             type: String,
             required: true
         },
@@ -31,7 +31,7 @@ const itemSchema = new Schema(
             required: true
         },
         // 아이템 사용시 경험치 증가량
-        exp: {
+        experience: {
             type: Number,
             required: true
         },
