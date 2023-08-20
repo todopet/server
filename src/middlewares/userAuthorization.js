@@ -8,7 +8,7 @@ const userAuthorization = (req, res, next) => {
     // 토근이 없을 때에도 다음 미들웨어로 넘어가기
     if (!userToken || userToken === "null") {
         console.log("authorization 토큰이 없음");
-        next();
+        next(); // 다음 미들웨어로 진행
         return;
     }
 

@@ -4,7 +4,6 @@ const myPetSchema = new Schema(
     {
         userId: {
             type: Schema.Types.ObjectId,
-            ref: "User",
             required: true
         },
         pets: [
@@ -18,7 +17,7 @@ const myPetSchema = new Schema(
                     required: true
                 },
                 // 경험치
-                curExp: {
+                experience: {
                     type: Number,
                     default: 0
                 },

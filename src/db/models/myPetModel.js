@@ -5,7 +5,7 @@ const MyPet = model("myPets", myPetSchema);
 const Pet = model("pets", petSchema);
 
 class MyPetModel {
-    async find(userId) {
+    async findById(userId) {
         // 결과에서 pet Id 꺼내서 pet쪽 컬렉션 또 조회, 그 다음에 가공해서 보낸다.
         const myPet = await MyPet.findOne({ userId }).lean();
 

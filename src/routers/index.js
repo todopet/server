@@ -13,12 +13,12 @@ import petRouter from "./petRouter.js";
 const v1Router = Router();
 
 v1Router.use("/", authRouter);
-v1Router.use("/user", userRouter);
-v1Router.use("/todoCategory", todoCategoryRouter);
-v1Router.use("/todoContent", todoContentRouter);
-v1Router.use("/inventory", inventoryRouter);
-v1Router.use("/item", itemRouter);
-v1Router.use("/myPet", myPetRouter);
-v1Router.use("/pet", petRouter);
+v1Router.use("/users", userRouter);
+v1Router.use("/todoCategories", todoCategoryRouter);
+v1Router.use("/todoContents", todoContentRouter);
+v1Router.use("/inventories", inventoryRouter);
+v1Router.use("/items", itemRouter);
+v1Router.use("/myPets", myPetRouter);
+v1Router.use("/pets", petRouter);
 
 export const v1 = v1Router;
