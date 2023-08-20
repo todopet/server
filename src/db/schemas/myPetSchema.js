@@ -10,7 +10,6 @@ const myPetSchema = new Schema(
             {
                 pet: {
                     type: Schema.Types.ObjectId
-                    // ref: "Pet"
                 },
                 myPetName: {
                     type: String,
@@ -45,7 +44,8 @@ const myPetSchema = new Schema(
         ]
     },
     {
-        timestamps: true
+        timestamps: true,
+        versionKey: false
     }
 );
 
