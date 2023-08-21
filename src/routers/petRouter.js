@@ -1,14 +1,14 @@
-import { Router } from "express";
-import { PetService } from "../services/index.js";
-import { buildResponse } from "../misc/utils.js";
-import asyncHandler from "../middlewares/asnycHandler.js";
+import { Router } from 'express';
+import { PetService } from '../services/index.js';
+import { buildResponse } from '../misc/utils.js';
+import asyncHandler from '../middlewares/asyncHandler.js';
 
 const petRouter = Router();
 const petService = new PetService();
 
 // Pet 조회
 petRouter.get(
-    "/:id",
+    '/:id',
     asyncHandler(async (req, res, next) => {
         const { id } = req.params;
         const result = await petService.getPet(id);
@@ -18,7 +18,7 @@ petRouter.get(
 
 // Pet 전체 조회
 petRouter.get(
-    "/",
+    '/',
     asyncHandler(async (req, res, next) => {
         const allPets = await petService.getAllPets(); // 새로운 메서드 추가
         res.json(buildResponse(allPets));
@@ -27,7 +27,7 @@ petRouter.get(
 
 // Pet 저장
 petRouter.post(
-    "/",
+    '/',
     asyncHandler(async (req, res, next) => {
         const {
             petName,
@@ -53,7 +53,7 @@ petRouter.post(
 
 // Pet 수정
 petRouter.patch(
-    "/:id",
+    '/:id',
     asyncHandler(async (req, res, next) => {
         const { id } = req.params;
         const {
@@ -80,7 +80,7 @@ petRouter.patch(
 
 // Pet 삭제
 petRouter.delete(
-    "/:id",
+    '/:id',
     asyncHandler(async (req, res, next) => {
         const { id } = req.params;
         const result = await petService.deletePet(id);
