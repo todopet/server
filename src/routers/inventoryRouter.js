@@ -11,8 +11,7 @@ const inventoryService = new InventoryService();
 inventoryRouter.get(
     '/',
     asyncHandler(async (req, res, next) => {
-        const userId = req.currentUserId; // 사용자 ID로 인벤토리 ID 얻음
-        console.log(userId);
+        const userId = req.currentUserId;
         const inventoryId = await inventoryService.getInventoryIdByUserId(
             userId
         );
@@ -62,7 +61,7 @@ inventoryRouter.patch(
 
         const inventoryId = await inventoryService.getInventoryIdByUserId(
             req.currentUserId
-        ); // 사용자 ID로 인벤토리 ID 얻음
+        );
 
         const result = await inventoryService.updateInventoryItemQuantity(
             inventoryId,
@@ -79,10 +78,16 @@ inventoryRouter.delete(
     '/items/:inventoryItemId',
     asyncHandler(async (req, res, next) => {
         const { inventoryItemId } = req.params;
+
+        const inventoryId = await inventoryService.getInventoryIdByUserId(
+            req.currentUserId
+        );
+
         const result = await inventoryService.deleteInventoryItem(
-            req.user.userId, // 사용자 ID로 인벤토리 ID 얻음
+            inventoryId,
             inventoryItemId
         );
+
         res.json(buildResponse(result));
     })
 );
