@@ -37,7 +37,7 @@ class TodoContentService {
         // 히스토리 조회
         const history = await this.historyService.getHistory(userId, id);
         // 히스토리 없으면 보상 지급 및 히스토리 추가
-        if (history.length) {
+        if (!history.length) {
             // 보상 지급
             await this.rewardService.addReward(userId);
             // 히스토리 추가

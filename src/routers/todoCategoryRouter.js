@@ -9,9 +9,7 @@ const todoCategoryService = new TodoCategoryService();
 todoCategoryRouter.get(
     '/',
     asyncHandler(async (req, res, next) => {
-        // 유저 검증 미들웨어 필요
-        const userId = '64e2e0710677448a130fb24e';
-        // const { userId } = req.currentUserId;
+        const userId = req.currentUserId;
         const category = await todoCategoryService.getCategories(userId);
         return category;
     })
@@ -21,9 +19,6 @@ todoCategoryRouter.get(
 todoCategoryRouter.get(
     '/:id',
     asyncHandler(async (req, res, next) => {
-        // 유저 검증 미들웨어 필요
-        // const userId = "64e2e0710677448a130fb24e";
-        // const { userId } = req.currentUserId;
         const { id } = req.params;
         const category = await todoCategoryService.getCategory(id);
         return category;
@@ -34,10 +29,8 @@ todoCategoryRouter.get(
 todoCategoryRouter.post(
     '/',
     asyncHandler(async (req, res, next) => {
-        // 유저 검증 미들웨어 필요
-        // const userId = "64e2e0710677448a130fb24e";
-        // const { userId } = req.currentUserId;
-        const { userId, category } = req.body;
+        const userId = req.currentUserId;
+        const { category } = req.body;
         const result = await todoCategoryService.addCategory({
             userId,
             category
@@ -50,7 +43,6 @@ todoCategoryRouter.post(
 todoCategoryRouter.patch(
     '/:id',
     asyncHandler(async (req, res, next) => {
-        // 유저 검증 미들웨어 필요
         const { id } = req.params;
         const { category } = req.body;
         const result = await todoCategoryService.updateCategory(id, category);
@@ -62,7 +54,6 @@ todoCategoryRouter.patch(
 todoCategoryRouter.delete(
     '/:id',
     asyncHandler(async (req, res, next) => {
-        // 유저 검증 미들웨어 필요
         const { id } = req.params;
         const result = await todoCategoryService.deleteCategory(id);
         return result;
