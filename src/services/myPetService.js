@@ -1,11 +1,11 @@
-import { MyPetModel } from "../db/models/index.js";
+import { MyPetModel } from '../db/models/index.js';
 
 class MyPetService {
     constructor() {
         this.myPetModel = new MyPetModel();
     }
     async getMyPet(userId) {
-        return await this.myPetModel.find(userId);
+        return await this.myPetModel.findByUserId(userId);
     }
     async addMyPet(userId, petId, petName) {
         return await this.myPetModel.create(userId, petId, petName);

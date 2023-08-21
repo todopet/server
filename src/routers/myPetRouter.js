@@ -15,7 +15,7 @@ myPetRouter.get(
         // const { userId } = req.currentUserId;
 
         const result = await myPetService.getMyPet(userId);
-        res.json(buildResponse(result));
+        return result;
     })
 );
 
