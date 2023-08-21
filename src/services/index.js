@@ -7,7 +7,7 @@ import ItemService from './itemService.js';
 import MyPetService from './myPetService.js';
 import PetService from './petService.js';
 import HistoryService from './historyService.js';
-
+import RewardService from './rewardService.js';
 export {
     UserService,
     TodoCategoryService,
@@ -17,5 +17,6 @@ export {
     ItemService,
     MyPetService,
     PetService,
-    HistoryService
+    HistoryService,
+    RewardService
 };

@@ -4,7 +4,7 @@ import InventoryService from '../services/inventoryService.js';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import axios from 'axios';
-import asyncHandler from '../middlewares/asyncHandler.js';
+import asyncHandler from '../middlewares/asnycHandler.js';
 import userAuthorization from '../middlewares/userAuthorization.js';
 import jwt from '../utils/jwt.js';
 

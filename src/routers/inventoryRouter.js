@@ -7,13 +7,30 @@ import userAuthorization from '../middlewares/userAuthorization.js';
 const inventoryRouter = Router();
 const inventoryService = new InventoryService();
 
+inventoryRouter.use(userAuthorization);
+
 // 인벤토리 조회
 inventoryRouter.get(
-    '/:inventoryId', // 경로 수정
+    '/:inventoryId',
+    userAuthorization,
     asyncHandler(async (req, res, next) => {
         const { inventoryId } = req.params;
         const result = await inventoryService.getInventoryByInventoryId(
             inventoryId
+        );
+        res.json(buildResponse(result));
+    })
+);
+
+//인벤토리 아이템 단일 조회
+inventoryRouter.get(
+    '/items/:inventoryItemId',
+    userAuthorization,
+    asyncHandler(async (req, res, next) => {
+        const { inventoryItemId } = req.params;
+        const result = await inventoryService.getInventoryItemById(
+            req.user.inventoryId, // 사용자 인증으로부터 인벤토리 ID 얻음
+            inventoryItemId
         );
         res.json(buildResponse(result));
     })
@@ -49,8 +66,6 @@ inventoryRouter.patch(
     asyncHandler(async (req, res, next) => {
         const { inventoryId, itemId } = req.params;
         const { quantity } = req.body;
-        console.log(inventoryId, itemId);
-        console.log(quantity);
         const result = await inventoryService.updateInventoryItemQuantity(
             inventoryId, // 인자 이름 수정
             itemId,
@@ -63,7 +78,7 @@ inventoryRouter.patch(
 // 인벤토리 아이템 삭제
 inventoryRouter.delete(
     '/:inventoryId/:itemId',
-    //userAuthorization,
+    userAuthorization,
     asyncHandler(async (req, res, next) => {
         const { inventoryId, itemId } = req.params;
         const result = await inventoryService.deleteInventoryItem(
