@@ -1,13 +1,7 @@
-import { Schema } from "mongoose";
+import { Schema } from 'mongoose';
 
 const todoContentSchema = new Schema(
     {
-        userId: {
-            type: String,
-            // type: Schema.Types.ObjectId,
-            // ref: "User",
-            required: true
-        },
         categoryId: {
             type: String,
             required: true
@@ -18,12 +12,13 @@ const todoContentSchema = new Schema(
         },
         status: {
             type: String,
-            enum: ["pending", "completed"],
-            default: "pending"
+            enum: ['pending', 'completed'],
+            default: 'pending'
         }
     },
     {
-        timestamps: true
+        timestamps: true,
+        versionKey: false
     }
 );
 

@@ -1,21 +1,26 @@
-import { Schema } from "mongoose";
-import todoContentSchema from "./todoContentSchema.js";
+import { Schema } from 'mongoose';
+import todoContentSchema from './todoContentSchema.js';
 
 const todoCategorySchema = new Schema(
     {
         userId: {
             type: Schema.Types.ObjectId,
-            ref: "User",
+            ref: 'User',
             required: true
         },
         category: {
             type: String,
             required: true
         },
-        todos: [todoContentSchema]
+        ended: {
+            type: Boolean,
+            required: true,
+            default: false
+        }
     },
     {
-        timestamps: true
+        timestamps: true,
+        versionKey: false
     }
 );
 
