@@ -33,7 +33,7 @@ myPetRouter.post(
             lowestLevelPet._id,
             myPetName
         );
-        res.json(buildResponse(result));
+        return result;
     })
 );
 
@@ -44,7 +44,7 @@ myPetRouter.patch(
         const { id } = req.params;
         const {} = req.body;
         const result = await myPetService.updateMyPet(id, {});
-        res.json(buildResponse(result));
+        return result;
     })
 );
 
@@ -54,7 +54,7 @@ myPetRouter.delete(
     asyncHandler(async (req, res, next) => {
         const { id } = req.params;
         const result = await myPetService.deleteMyPet(id);
-        res.json(buildResponse(result));
+        return result;
     })
 );
 
