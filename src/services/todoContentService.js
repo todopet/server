@@ -1,9 +1,11 @@
 import { TodoContentModel, TodoCategoryModel } from '../db/models/index.js';
+import { HistoryService } from '../services/index.js';
 
 class TodoContentService {
     constructor() {
         this.todoContentModel = new TodoContentModel();
         this.todoCategoryModel = new TodoCategoryModel();
+        this.historyService = new HistoryService();
     }
 
     async getMultipleContents(userId) {
@@ -21,6 +23,7 @@ class TodoContentService {
 
         return categories;
     }
+
     async getSingleContents(id) {
         return await this.todoContentModel.findById(id);
     }
@@ -30,6 +33,18 @@ class TodoContentService {
     }
 
     async updateContent(content) {
+        const { id, userId, todo, status } = content;
+        // 히스토리 조회
+        const history = await this.historyService.getHistory(userId, id);
+        // 히스토리 없으면 보상 지급 및 히스토리 추가
+        if (history.length) {
+            // 보상 지급
+            await this.rewardService.addReward(userId);
+            // 히스토리 추가
+            await this.historyService.addHistory(userId, id);
+        }
+
+        // 내용 업데이트 (완료처리 or 내용 수정)
         return await this.todoContentModel.update(content);
     }
 

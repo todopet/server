@@ -12,8 +12,8 @@ const todoContentSchema = new Schema(
         },
         status: {
             type: String,
-            enum: ['pending', 'completed'],
-            default: 'pending'
+            enum: ['unchecked', 'reverted', 'completed'],
+            default: 'unchecked'
         }
     },
     {
