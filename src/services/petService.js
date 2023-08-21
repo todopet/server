@@ -8,7 +8,10 @@ class PetService {
         return await this.petModel.findLowestLevel();
     }
     async getPet(id) {
-        return await this.petModel.find(id);
+        return await this.petModel.findById(id);
+    }
+    async getAllPets() {
+        return await this.petModel.findAllPets();
     }
     async addPet(pet) {
         return await this.petModel.create(pet);

@@ -13,6 +13,9 @@ class PetModel {
     async findById(id) {
         return await Pet.findById(id).lean();
     }
+    async findAllPets() {
+        return await Pet.find().lean();
+    }
     async create(pet) {
         return (await Pet.create(pet)).toObject();
     }

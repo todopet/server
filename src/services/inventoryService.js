@@ -1,13 +1,35 @@
 import { InventoryModel } from "../db/models/index.js";
+import { ItemService } from "./index.js";
 import mongoose from "mongoose";
 
 class InventoryService {
     constructor() {
         this.inventoryModel = new InventoryModel();
+        this.itemService = new ItemService();
     }
 
     async getInventoryByUserId(userId) {
-        return await this.inventoryModel.findByUserId(userId);
+        const inventory = await this.inventoryModel.findByUserId(userId);
+
+        if (!inventory) {
+            throw new Error("Inventory not found");
+        }
+
+        // 아이템 정보 가져오기
+        const itemsWithInfo = await Promise.all(
+            inventory.items.map(async (item) => {
+                const itemInfo = await this.itemService.getItem(item.item);
+                return {
+                    ...item.toObject(),
+                    info: itemInfo // 아이템 정보 추가
+                };
+            })
+        );
+
+        return {
+            ...inventory.toObject(),
+            items: itemsWithInfo // 아이템 정보 포함하여 반환
+        };
     }
 
     async addInventory(userId, items) {
@@ -91,7 +113,18 @@ class InventoryService {
         if (existingItem) {
             existingItem.quantity += quantity;
         } else {
-            inventory.items.push({ item: itemId, quantity });
+            // 아이템 정보 가져오기
+            const itemInfo = await this.itemService.getItem(itemId);
+
+            if (!itemInfo) {
+                throw new Error("Item not found");
+            }
+
+            inventory.items.push({
+                item: itemId,
+                quantity,
+                info: itemInfo // 아이템 정보 추가
+            });
         }
 
         return await this.inventoryModel.update(userId, {
