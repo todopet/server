@@ -1,28 +1,30 @@
-import { model } from "mongoose";
-import { inventorySchema } from "../schemas/index.js";
+import { model } from 'mongoose';
+import { inventorySchema } from '../schemas/index.js';
 
-const InventoryCategory = model("inventories", inventorySchema);
+const InventoryCategory = model('inventories', inventorySchema);
 
 class InventoryModel {
-    async findByUserId(userId) {
-        return await InventoryCategory.findOne({ userId: userId }).lean(); // ObjectId로 변환하여 사용
+    async findByInventoryId(inventoryId) {
+        return await InventoryCategory.findOne({ _id: inventoryId }).lean();
     }
 
     async create(inventory) {
         return (await InventoryCategory.create(inventory)).toObject();
     }
 
-    async update(userId, inventory) {
+    async update(inventoryId, inventory) {
         const updatedInventory = await InventoryCategory.findOneAndUpdate(
-            { userId },
+            { _id: inventoryId },
             inventory,
             { new: true }
         );
         return updatedInventory;
     }
 
-    async delete(userId) {
-        return await InventoryCategory.findOneAndDelete({ userId }).lean();
+    async delete(inventoryId) {
+        return await InventoryCategory.findOneAndDelete({
+            _id: inventoryId
+        }).lean();
     }
 }
 
