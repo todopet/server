@@ -10,7 +10,6 @@ const inventoryService = new InventoryService();
 // 인벤토리 조회
 inventoryRouter.get(
     '/',
-    userAuthorization,
     asyncHandler(async (req, res, next) => {
         const userId = req.currentUserId; // 사용자 ID로 인벤토리 ID 얻음
         console.log(userId);
@@ -33,19 +32,9 @@ inventoryRouter.get(
             req.currentUserId
         );
         const result = await inventoryService.getInventoryItemById(
-            inventoryId, // 인벤토리 ID로 수정
+            inventoryId,
             inventoryItemId
         );
-        res.json(buildResponse(result));
-    })
-);
-
-// 인벤토리 생성
-inventoryRouter.post(
-    '/',
-    asyncHandler(async (req, res, next) => {
-        const { userId, items } = req.body;
-        const result = await inventoryService.addInventory(userId, items);
         res.json(buildResponse(result));
     })
 );
@@ -70,11 +59,17 @@ inventoryRouter.patch(
     asyncHandler(async (req, res, next) => {
         const { inventoryItemId } = req.params;
         const { quantity } = req.body;
+
+        const inventoryId = await inventoryService.getInventoryIdByUserId(
+            req.currentUserId
+        ); // 사용자 ID로 인벤토리 ID 얻음
+
         const result = await inventoryService.updateInventoryItemQuantity(
-            req.user.userId, // 사용자 ID로 인벤토리 ID 얻음
+            inventoryId,
             inventoryItemId,
             quantity
         );
+
         res.json(buildResponse(result));
     })
 );

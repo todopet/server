@@ -116,22 +116,22 @@ class InventoryService {
         const inventory = await this.inventoryModel.findByInventoryId(
             inventoryId
         );
-
+    
         if (!inventory) {
             throw new Error('Inventory not found');
         }
-
+    
         if (isNaN(quantity)) {
             throw new Error('Invalid quantity');
         }
-
+    
         const existingItem = inventory.items.find(
             (item) => item.item && item.item.toString() === itemId
         );
-
+    
         if (existingItem) {
             existingItem.quantity += quantity;
-
+    
             if (existingItem.quantity <= 0) {
                 const updatedItems = inventory.items.filter(
                     (item) => item.item.toString() !== itemId
@@ -140,11 +140,11 @@ class InventoryService {
             }
         } else if (quantity > 0) {
             const itemInfo = await this.itemService.getItem(itemId);
-
+    
             if (!itemInfo) {
-                throw new Error('Item not found');
+                throw new Error('Item not found'); // 이 부분을 수정
             }
-
+    
             inventory.items.push({
                 item: itemId,
                 quantity,
@@ -153,12 +153,15 @@ class InventoryService {
         } else {
             throw new Error('Item not found in inventory');
         }
-
-        return await this.inventoryModel.update(inventoryId, {
+    
+        // Update inventory in the database
+        await this.inventoryModel.update(inventoryId, {
             items: inventory.items
         });
+    
+        return inventory;
     }
-
+    
     async deleteInventoryItem(inventoryId, itemId) {
         const inventory = await this.inventoryModel.findByInventoryId(
             inventoryId

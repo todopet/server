@@ -2,7 +2,8 @@ import jwt from '../utils/jwt.js';
 
 const userAuthorization = async (req, res, next) => {
     // const auth = req.headers.authorization;
-    const Token = req.cookies.token;
+    // const Token = req.cookies.token;
+    const Token = req.headers.token;
     // const userToken = auth?.split(' ')[1];
 
     if (!Token || Token === 'null') {
@@ -13,8 +14,9 @@ const userAuthorization = async (req, res, next) => {
 
     try {
         const { userId } = jwt.verify(Token);
-        req.currentUserId = userId;
         console.log(userId);
+        req.currentUserId = userId;
+        console.log(req.currentUserId);
         next();
     } catch (err) {
         next(err);
