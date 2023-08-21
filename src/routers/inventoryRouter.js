@@ -34,7 +34,7 @@ inventoryRouter.get(
             inventoryId,
             inventoryItemId
         );
-        res.json(buildResponse(result));
+        return result;
     })
 );
 
@@ -48,7 +48,7 @@ inventoryRouter.post(
             itemId,
             quantity
         );
-        res.json(buildResponse(result));
+        return result;
     })
 );
 
@@ -69,7 +69,7 @@ inventoryRouter.patch(
             quantity
         );
 
-        res.json(buildResponse(result));
+        return result;
     })
 );
 
@@ -88,7 +88,7 @@ inventoryRouter.delete(
             inventoryItemId
         );
 
-        res.json(buildResponse(result));
+        return result;
     })
 );
 
