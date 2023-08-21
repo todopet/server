@@ -9,7 +9,6 @@ class InventoryService {
     }
 
     async getInventoryByInventoryId(inventoryId) {
-        // 인자 이름 변경 및 findById 메서드 사용
         const inventory = await this.inventoryModel.findByInventoryId(
             inventoryId
         );
@@ -94,7 +93,7 @@ class InventoryService {
 
         if (itemInInventory) {
             return {
-                item: itemInInventory.info, // 아이템 정보 추가
+                item: itemInInventory.info,
                 quantity: itemInInventory.quantity
             };
         } else {
@@ -112,57 +111,44 @@ class InventoryService {
         });
     }
 
-    async updateInventoryItemQuantity(inventoryId, itemId, quantity) {
+    async updateInventoryItemQuantity(inventoryId, inventoryItemId, quantity) {
         const inventory = await this.inventoryModel.findByInventoryId(
             inventoryId
         );
-    
+
         if (!inventory) {
             throw new Error('Inventory not found');
         }
-    
+
         if (isNaN(quantity)) {
             throw new Error('Invalid quantity');
         }
-    
+
         const existingItem = inventory.items.find(
-            (item) => item.item && item.item.toString() === itemId
+            (item) => item._id.toString() === inventoryItemId
         );
-    
+
         if (existingItem) {
             existingItem.quantity += quantity;
-    
+
             if (existingItem.quantity <= 0) {
                 const updatedItems = inventory.items.filter(
-                    (item) => item.item.toString() !== itemId
+                    (item) => item._id.toString() !== inventoryItemId
                 );
                 inventory.items = updatedItems;
             }
-        } else if (quantity > 0) {
-            const itemInfo = await this.itemService.getItem(itemId);
-    
-            if (!itemInfo) {
-                throw new Error('Item not found'); // 이 부분을 수정
-            }
-    
-            inventory.items.push({
-                item: itemId,
-                quantity,
-                info: itemInfo
-            });
         } else {
             throw new Error('Item not found in inventory');
         }
-    
-        // Update inventory in the database
+
         await this.inventoryModel.update(inventoryId, {
             items: inventory.items
         });
-    
+
         return inventory;
     }
-    
-    async deleteInventoryItem(inventoryId, itemId) {
+
+    async deleteInventoryItem(inventoryId, inventoryItemId) {
         const inventory = await this.inventoryModel.findByInventoryId(
             inventoryId
         );
@@ -172,7 +158,7 @@ class InventoryService {
         }
 
         const updatedItems = inventory.items.filter(
-            (item) => item.item.toString() !== itemId
+            (item) => item._id.toString() !== inventoryItemId
         );
 
         return await this.inventoryModel.update(inventoryId, {
@@ -208,7 +194,7 @@ class InventoryService {
             inventory.items.push({
                 item: itemId,
                 quantity,
-                info: itemInfo // 아이템 정보 추가
+                info: itemInfo
             });
         }
 
