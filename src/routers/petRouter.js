@@ -16,6 +16,15 @@ petRouter.get(
     })
 );
 
+// Pet 전체 조회
+petRouter.get(
+    "/",
+    asyncHandler(async (req, res, next) => {
+        const allPets = await petService.getAllPets(); // 새로운 메서드 추가
+        res.json(buildResponse(allPets));
+    })
+);
+
 // Pet 저장
 petRouter.post(
     "/",
@@ -23,7 +32,7 @@ petRouter.post(
         const {
             petName,
             level,
-            exp,
+            experience,
             hunger,
             affection,
             cleanliness,
@@ -32,7 +41,7 @@ petRouter.post(
         const result = await petService.addPet({
             petName,
             level,
-            exp,
+            experience,
             hunger,
             affection,
             cleanliness,
@@ -50,7 +59,7 @@ petRouter.patch(
         const {
             petName,
             level,
-            exp,
+            experience,
             hunger,
             affection,
             cleanliness,
@@ -59,7 +68,7 @@ petRouter.patch(
         const result = await petService.updatePet(id, {
             petName,
             level,
-            exp,
+            experience,
             hunger,
             affection,
             cleanliness,
