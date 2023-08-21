@@ -20,14 +20,14 @@ class InventoryService {
             inventory.items.map(async (item) => {
                 const itemInfo = await this.itemService.getItem(item.item);
                 return {
-                    ...item.toObject(),
+                    ...item,
                     info: itemInfo // 아이템 정보 추가
                 };
             })
         );
 
         return {
-            ...inventory.toObject(),
+            ...inventory,
             items: itemsWithInfo // 아이템 정보 포함하여 반환
         };
     }
