@@ -1,6 +1,10 @@
-import { model } from "mongoose";
-import { historySchema } from "../schemas/index.js";
+import { model } from 'mongoose';
+import { historySchema } from '../schemas/index.js';
 
-const HistoryCategory = model("histories", historySchema);
-class HistoryModel {}
+const History = model('histories', historySchema);
+class HistoryModel {
+    async findHistory(userId, contentId) {
+        return await History.find({ userId, contentId }).lean();
+    }
+}
 export default HistoryModel;
