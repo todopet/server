@@ -12,7 +12,7 @@ petRouter.get(
     asyncHandler(async (req, res, next) => {
         const { id } = req.params;
         const result = await petService.getPet(id);
-        res.json(buildResponse(result));
+        return result;
     })
 );
 
@@ -21,7 +21,7 @@ petRouter.get(
     '/',
     asyncHandler(async (req, res, next) => {
         const allPets = await petService.getAllPets(); // 새로운 메서드 추가
-        res.json(buildResponse(allPets));
+        return result;
     })
 );
 
@@ -47,7 +47,7 @@ petRouter.post(
             cleanliness,
             condition
         });
-        res.json(buildResponse(result));
+        return result;
     })
 );
 
@@ -74,7 +74,7 @@ petRouter.patch(
             cleanliness,
             condition
         });
-        res.json(buildResponse(result));
+        return result;
     })
 );
 
@@ -84,7 +84,7 @@ petRouter.delete(
     asyncHandler(async (req, res, next) => {
         const { id } = req.params;
         const result = await petService.deletePet(id);
-        res.json(buildResponse(result));
+        return result;
     })
 );
 

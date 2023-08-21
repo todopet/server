@@ -12,7 +12,7 @@ itemRouter.get(
     asyncHandler(async (req, res, next) => {
         const { id } = req.params;
         const result = await itemService.getItem(id);
-        res.json(buildResponse(result));
+        return result;
     })
 );
 
@@ -38,7 +38,7 @@ itemRouter.post(
             experience,
             probability
         });
-        res.json(buildResponse(result));
+        return result;
     })
 );
 
@@ -65,7 +65,7 @@ itemRouter.patch(
             experience,
             probability
         });
-        res.json(buildResponse(result));
+        return result;
     })
 );
 
@@ -75,7 +75,7 @@ itemRouter.delete(
     asyncHandler(async (req, res, next) => {
         const { id } = req.params;
         const result = await itemService.deleteItem(id);
-        res.json(buildResponse(result));
+        return result;
     })
 );
 
