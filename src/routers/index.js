@@ -1,6 +1,5 @@
 import { Router } from 'express';
 
-import authRouter from './authRouter.js';
 import userRouter from './userRouter.js';
 import todoCategoryRouter from './todoCategoryRouter.js';
 import todoContentRouter from './todoContentRouter.js';

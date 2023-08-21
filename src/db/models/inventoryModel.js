@@ -7,6 +7,9 @@ class InventoryModel {
     async findByInventoryId(inventoryId) {
         return await InventoryCategory.findOne({ _id: inventoryId }).lean();
     }
+    async findByUserId(userId) {
+        return await InventoryCategory.findOne({ userId }).lean();
+    }
 
     async create(inventory) {
         return (await InventoryCategory.create(inventory)).toObject();

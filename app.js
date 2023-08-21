@@ -45,6 +45,7 @@ app.use(express.urlencoded({ extended: false }));
 //app.use(express.static(path.join(__dirname, "public")));
 
 // version 1의 api router 등록
+app.use('/api/v1', authRouter);
 app.use('/api/v1', userAuthorization, v1);
 
 app.listen(PORT, function () {
