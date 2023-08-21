@@ -35,6 +35,72 @@ class InventoryService {
         };
     }
 
+    async getInventoryIdByUserId(userId) {
+        const inventory = await this.inventoryModel.findByUserId(userId);
+
+        if (!inventory) {
+            throw new Error(`Inventory not found for userId: ${userId}`);
+        }
+
+        return inventory._id.toString();
+    }
+
+    async getInventoryItem(inventoryId, itemId) {
+        const inventory = await this.inventoryModel.findByInventoryId(
+            inventoryId
+        );
+
+        if (!inventory) {
+            throw new Error('Inventory not found');
+        }
+
+        const itemInInventory = inventory.items.find(
+            (item) => item.item && item.item.toString() === itemId
+        );
+
+        if (itemInInventory) {
+            return itemInInventory;
+        } else {
+            return null;
+        }
+    }
+
+    async getInventoryItemById(inventoryId, itemId) {
+        const inventory = await this.getInventoryByInventoryId(inventoryId);
+
+        const item = inventory.items.find(
+            (item) => item._id.toString() === itemId
+        );
+
+        if (!item) {
+            throw new Error('Item not found in inventory');
+        }
+
+        return item;
+    }
+
+    async getInventoryItemWithQuantity(inventoryId, itemId) {
+        const inventory = await this.inventoryModel.findByInventoryId(
+            inventoryId
+        );
+
+        if (!inventory) {
+            throw new Error('Inventory not found');
+        }
+
+        const itemInInventory = inventory.items.find(
+            (item) => item.item && item.item.toString() === itemId
+        );
+
+        if (itemInInventory) {
+            return {
+                item: itemInInventory.info, // 아이템 정보 추가
+                quantity: itemInInventory.quantity
+            };
+        } else {
+            return null;
+        }
+    }
     async addInventory(userId, items) {
         if (!mongoose.Types.ObjectId.isValid(userId)) {
             throw new Error('Invalid userId');
@@ -112,7 +178,6 @@ class InventoryService {
     }
 
     async addItemToInventory(inventoryId, itemId, quantity) {
-        // 인자 이름 변경
         const inventory = await this.inventoryModel.findByInventoryId(
             inventoryId
         );
@@ -121,12 +186,13 @@ class InventoryService {
             throw new Error('Inventory not found');
         }
 
-        const existingItem = inventory.items.find(
-            (item) => item.item && item.item.toString() === itemId
+        const existingItemIndex = inventory.items.findIndex(
+            (item) => item.item.toString() === itemId
         );
 
-        if (existingItem) {
-            existingItem.quantity += quantity;
+        if (existingItemIndex !== -1) {
+            // 이미 있는 아이템인 경우 수량 증가
+            inventory.items[existingItemIndex].quantity += quantity;
         } else {
             // 아이템 정보 가져오기
             const itemInfo = await this.itemService.getItem(itemId);
@@ -135,6 +201,7 @@ class InventoryService {
                 throw new Error('Item not found');
             }
 
+            // 새로운 아이템 추가
             inventory.items.push({
                 item: itemId,
                 quantity,
@@ -143,7 +210,6 @@ class InventoryService {
         }
 
         return await this.inventoryModel.update(inventoryId, {
-            // inventoryId 사용
             items: inventory.items
         });
     }

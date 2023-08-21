@@ -1,4 +1,4 @@
-import { ItemModel } from "../db/models/index.js";
+import { ItemModel } from '../db/models/index.js';
 
 class ItemService {
     constructor() {
@@ -6,6 +6,9 @@ class ItemService {
     }
     async getItem(id) {
         return await this.itemModel.findById(id);
+    }
+    async getAllItems() {
+        return await this.itemModel.findAll();
     }
     async addItem({
         name,

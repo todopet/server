@@ -7,6 +7,9 @@ class ItemModel {
     async findById(id) {
         return await Item.findById(id);
     }
+    async findAll() {
+        return await Item.find().lean();
+    }
     async create(item) {
         return (await Item.create(item)).toObject();
     }
