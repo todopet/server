@@ -1,6 +1,6 @@
-import { InventoryModel } from "../db/models/index.js";
-import { ItemService } from "./index.js";
-import mongoose from "mongoose";
+import { InventoryModel } from '../db/models/index.js';
+import { ItemService } from './index.js';
+import mongoose from 'mongoose';
 
 class InventoryService {
     constructor() {
@@ -8,11 +8,14 @@ class InventoryService {
         this.itemService = new ItemService();
     }
 
-    async getInventoryByUserId(userId) {
-        const inventory = await this.inventoryModel.findByUserId(userId);
+    async getInventoryByInventoryId(inventoryId) {
+        // 인자 이름 변경 및 findById 메서드 사용
+        const inventory = await this.inventoryModel.findByInventoryId(
+            inventoryId
+        );
 
         if (!inventory) {
-            throw new Error("Inventory not found");
+            throw new Error('Inventory not found');
         }
 
         // 아이템 정보 가져오기
@@ -34,7 +37,7 @@ class InventoryService {
 
     async addInventory(userId, items) {
         if (!mongoose.Types.ObjectId.isValid(userId)) {
-            throw new Error("Invalid userId");
+            throw new Error('Invalid userId');
         }
 
         return await this.inventoryModel.create({
@@ -43,67 +46,79 @@ class InventoryService {
         });
     }
 
-    async updateInventory(userId, inventoryData) {
-        const inventory = await this.inventoryModel.findByUserId(userId);
+    async updateInventoryItemQuantity(inventoryId, itemId, quantity) {
+        const inventory = await this.inventoryModel.findByInventoryId(
+            inventoryId
+        );
+
         if (!inventory) {
-            throw new Error("Inventory not found");
+            throw new Error('Inventory not found');
         }
 
-        const updatedItems = inventory.items.map((existingItem) => {
-            const updatedItem = inventoryData.items.find(
-                (newItem) => newItem.item === existingItem.item.toString()
-            );
+        if (isNaN(quantity)) {
+            throw new Error('Invalid quantity');
+        }
 
-            if (updatedItem) {
-                existingItem.quantity = updatedItem.quantity;
+        const existingItem = inventory.items.find(
+            (item) => item.item && item.item.toString() === itemId
+        );
+
+        if (existingItem) {
+            existingItem.quantity += quantity;
+
+            if (existingItem.quantity <= 0) {
+                const updatedItems = inventory.items.filter(
+                    (item) => item.item.toString() !== itemId
+                );
+                inventory.items = updatedItems;
+            }
+        } else if (quantity > 0) {
+            const itemInfo = await this.itemService.getItem(itemId);
+
+            if (!itemInfo) {
+                throw new Error('Item not found');
             }
 
-            return existingItem;
-        });
+            inventory.items.push({
+                item: itemId,
+                quantity,
+                info: itemInfo
+            });
+        } else {
+            throw new Error('Item not found in inventory');
+        }
 
-        inventoryData.items.forEach((newItem) => {
-            const existingItem = updatedItems.find(
-                (item) => item.item.toString() === newItem.item
-            );
-
-            if (!existingItem) {
-                updatedItems.push({
-                    item: newItem.item,
-                    quantity: newItem.quantity
-                });
-            }
-        });
-
-        inventory.items = updatedItems;
-
-        return await this.inventoryModel.update(userId, {
-            items: updatedItems
+        return await this.inventoryModel.update(inventoryId, {
+            items: inventory.items
         });
     }
 
-    async deleteItemFromInventory(userId, itemId) {
-        const inventory = await this.inventoryModel.findByUserId(userId);
+    async deleteInventoryItem(inventoryId, itemId) {
+        const inventory = await this.inventoryModel.findByInventoryId(
+            inventoryId
+        );
+
         if (!inventory) {
-            throw new Error("Inventory not found");
+            throw new Error('Inventory not found');
         }
 
         const updatedItems = inventory.items.filter(
             (item) => item.item.toString() !== itemId
         );
-        inventory.items = updatedItems;
 
-        const updatedInventory = await this.inventoryModel.update(userId, {
+        return await this.inventoryModel.update(inventoryId, {
             items: updatedItems
         });
-
-        return updatedInventory;
     }
 
-    async addItemToInventory(userId, itemId, quantity) {
-        const inventory = await this.inventoryModel.findByUserId(userId);
+    async addItemToInventory(inventoryId, itemId, quantity) {
+        // 인자 이름 변경
+        const inventory = await this.inventoryModel.findByInventoryId(
+            inventoryId
+        );
 
         if (!inventory) {
-            throw new Error("Inventory not found");
+            throw new Error('Inventory not found');
         }
 
         const existingItem = inventory.items.find(
@@ -117,7 +132,7 @@ class InventoryService {
             const itemInfo = await this.itemService.getItem(itemId);
 
             if (!itemInfo) {
-                throw new Error("Item not found");
+                throw new Error('Item not found');
             }
 
             inventory.items.push({
@@ -127,7 +142,8 @@ class InventoryService {
             });
         }
 
-        return await this.inventoryModel.update(userId, {
+        return await this.inventoryModel.update(inventoryId, {
+            // inventoryId 사용
             items: inventory.items
         });
     }

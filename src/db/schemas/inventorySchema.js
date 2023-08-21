@@ -1,4 +1,4 @@
-import { Schema } from "mongoose";
+import { Schema } from 'mongoose';
 
 const inventorySchema = new Schema(
     {
@@ -20,8 +20,8 @@ const inventorySchema = new Schema(
         ]
     },
     {
-        timestamps: true,
-        versionKey: false
+        versionKey: false,
+        timestamps: true
     }
 );
 

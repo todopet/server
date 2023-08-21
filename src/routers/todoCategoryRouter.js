@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { TodoCategoryService } from '../services/index.js';
-import asyncHandler from '../middlewares/asnycHandler.js';
+import asyncHandler from '../middlewares/asyncHandler.js';
 
 const todoCategoryRouter = Router();
 const todoCategoryService = new TodoCategoryService();
