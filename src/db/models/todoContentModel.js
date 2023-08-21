@@ -1,49 +1,35 @@
-import mongoose, { model } from "mongoose";
-import {
-    historySchema,
-    todoCategorySchema,
-    todoContentSchema
-} from "../schemas/index.js";
-
-const TodoContent = model("todoContents", todoContentSchema);
-const TodoCategory = model("todoCategories", todoCategorySchema);
-const History = model("histories", historySchema);
+import mongoose from 'mongoose';
+import { todoCategoryModel, todoContentModel, historyModel } from './index.js';
 
 class TodoContentModel {
-    // async find(id) {
-    //     // TODO: 날짜 오름차순, 내림차순 정렬 필요?
-    //     return await TodoContent.find({ userId: id }).lean();
-    // }
-    // async findById(id) {
-    //     // TODO: 날짜 오름차순, 내림차순 정렬 필요?
-    //     return await TodoContent.findById(id, { userId }).lean();
-    // }
+    constructor() {
+        this.todoCategoryModel = todoCategoryModel;
+        this.todoContentModel = todoContentModel;
+        this.historyModel = historyModel;
+    }
+    async findByCategoryId(id) {
+        return await this.todoContentModel.find({ categoryId: id }).lean();
+    }
+    async findById(id) {
+        return await this.todoContentModel.findById(id).lean();
+    }
     async create(content) {
-        const { categoryId, userId, todo } = content;
-        // content 등록 후 그 내용을 category에 저장
-        const todoContent = await TodoContent.create({
-            userId,
-            categoryId,
-            todo
-        });
-        console.log("todoContent");
-        // console.log(todoContent);
-        const id = categoryId;
+        const { categoryId, todo } = content;
 
-        // 카테고리 아래에 content 저장
-        await TodoCategory.findByIdAndUpdate(id, {
-            $push: { todos: todoContent }
-        });
-
-        return todoContent.toObject();
+        return (
+            await this.todoContentModel.create({
+                categoryId,
+                todo
+            })
+        ).toObject();
     }
     async update(content) {
         const { categoryId: id, userId, contentId, todo, status } = content;
-        // 히ㅏ스토리 조회해서 데이터 있으면 보상주고 아님 안줌
+        // 히스토리 조회해서 데이터 있으면 보상주고 아님 안줌
         // 인벤토리에 데이터 꽂아줌
         // console.log(id, userId, contentId);
-        const history = await History.findOne({
-            userId: new mongoose.Types.ObjectId(userId),
+        const history = await this.historyModel.findOne({
+            userId,
             contentId
         });
         // console.log(history);
@@ -59,25 +45,25 @@ class TodoContentModel {
 
         // TODO: 변화된 데이터만 리턴해 내고 싶은데 그렇게는 할 수 없을까?
         return (
-            await TodoCategory.findOneAndUpdate(
+            await this.todoCategoryModel.findOneAndUpdate(
                 {
-                    _id: new mongoose.Types.ObjectId(id), // 문서의 _id
-                    "todos._id": new mongoose.Types.ObjectId(contentId) // todo 객체의 _id
+                    _id: id, // 문서의 _id
+                    'todos._id': contentId // todo 객체의 _id
                 },
                 {
                     $set: {
-                        "todos.$.todo": todo,
-                        "todos.$.status": status
+                        'todos.$.todo': todo,
+                        'todos.$.status': status
                     }
                 },
                 { new: true }
             )
-        ).toObject();
+        ).lean();
     }
 
     async delete(categoryId, contentId) {
         const id = new mongoose.Types.ObjectId(categoryId);
-        return await TodoCategory.findByIdAndUpdate(id, {
+        return await this.todoCategoryModel.findByIdAndUpdate(id, {
             $pull: { todos: { _id: new mongoose.Types.ObjectId(contentId) } }
         });
     }
