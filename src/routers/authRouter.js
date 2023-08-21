@@ -82,7 +82,9 @@ authRouter.get(
         const token = jwt.sign(user._id);
 
         res.cookie('token', token);
-        res.redirect('/api/v1');
+        // TODO: 환경변수로라도.. 관리
+        // 배포환경에서는 /todo 만 놓으면 됨 origin이 같기 때문.
+        res.redirect('http://localhost:3000/todo'); // http://localhost:3001/api/v1
     })
 );
 
