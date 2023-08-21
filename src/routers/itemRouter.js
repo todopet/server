@@ -1,14 +1,14 @@
-import { Router } from "express";
-import { ItemService } from "../services/index.js";
-import { buildResponse } from "../misc/utils.js";
-import asyncHandler from "../middlewares/asnycHandler.js";
+import { Router } from 'express';
+import { ItemService } from '../services/index.js';
+import { buildResponse } from '../misc/utils.js';
+import asyncHandler from '../middlewares/asyncHandler.js';
 
 const itemRouter = Router();
 const itemService = new ItemService();
 
 // item 조회
 itemRouter.get(
-    "/:id",
+    '/:id',
     asyncHandler(async (req, res, next) => {
         const { id } = req.params;
         const result = await itemService.getItem(id);
@@ -18,7 +18,7 @@ itemRouter.get(
 
 // item 저장
 itemRouter.post(
-    "/",
+    '/',
     asyncHandler(async (req, res, next) => {
         const {
             name,
@@ -44,7 +44,7 @@ itemRouter.post(
 
 // item 수정
 itemRouter.patch(
-    "/:id",
+    '/:id',
     asyncHandler(async (req, res, next) => {
         const { id } = req.params;
         const {
@@ -71,7 +71,7 @@ itemRouter.patch(
 
 // item 삭제
 itemRouter.delete(
-    "/:id",
+    '/:id',
     asyncHandler(async (req, res, next) => {
         const { id } = req.params;
         const result = await itemService.deleteItem(id);

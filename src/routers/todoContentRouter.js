@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { TodoContentService } from '../services/index.js';
 import { buildResponse } from '../misc/utils.js';
-import asyncHandler from '../middlewares/asnycHandler.js';
+import asyncHandler from '../middlewares/asyncHandler.js';
 
 const todoContentRouter = Router();
 const todoContentService = new TodoContentService();
