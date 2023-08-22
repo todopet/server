@@ -63,13 +63,10 @@ todoContentRouter.patch(
 
 // TODO 계획(todo) 삭제
 todoContentRouter.delete(
-    '/',
+    '/:id',
     asyncHandler(async (req, res, next) => {
-        const { categoryId, contentId } = req.body;
-        const result = await todoContentService.deleteContent(
-            categoryId,
-            contentId
-        );
+        const { id } = req.params;
+        const result = await todoContentService.deleteContent(id);
         return result;
     })
 );

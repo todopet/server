@@ -65,11 +65,8 @@ class TodoContentModel {
         // ).lean();
     }
 
-    async delete(categoryId, contentId) {
-        const id = new mongoose.Types.ObjectId(categoryId);
-        return await this.todoCategoryModel.findByIdAndUpdate(id, {
-            $pull: { todos: { _id: new mongoose.Types.ObjectId(contentId) } }
-        });
+    async delete(id) {
+        return await this.todoContentModel.findByIdAndDelete(id).lean();
     }
 }
 
