@@ -7,7 +7,6 @@ import inventoryRouter from './inventoryRouter.js';
 import itemRouter from './itemRouter.js';
 import myPetRouter from './myPetRouter.js';
 import petRouter from './petRouter.js';
-
 // 버전1 라우터
 const v1Router = Router();
 
