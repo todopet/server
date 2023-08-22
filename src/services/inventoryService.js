@@ -125,7 +125,7 @@ class InventoryService {
         }
 
         const existingItem = inventory.items.find(
-            (item) => item._id.toString() === inventoryItemId
+            (item) => item.item.toString() === inventoryItemId
         );
 
         if (existingItem) {
