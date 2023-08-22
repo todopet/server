@@ -11,8 +11,8 @@ const petService = new PetService();
 myPetRouter.get(
     '/',
     asyncHandler(async (req, res, next) => {
-        const userId = '64de2fbf9a951f54beeff3ff';
-        // const { userId } = req.currentUserId;
+        
+        const userId = req.currentUserId;
 
         const result = await myPetService.getMyPet(userId);
         return result;
@@ -23,10 +23,9 @@ myPetRouter.get(
 myPetRouter.post(
     '/',
     asyncHandler(async (req, res, next) => {
-        const userId = '64de2fbf9a951f54beeff3ff';
-        // const { userId } = req.currentUserId;
+       
+     const userId = req.currentUserId;
         const lowestLevelPet = await petService.getLowestLevel();
-        console.log(lowestLevelPet);
         const { myPetName } = req.body;
         const result = await myPetService.addMyPet(
             userId,
