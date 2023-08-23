@@ -7,19 +7,34 @@ const myPetRouter = Router();
 const myPetService = new MyPetService();
 const petService = new PetService();
 
-// myPet 조회
+// myPet 전체조회
 myPetRouter.get(
     '/',
     asyncHandler(async (req, res, next) => {
         const userId = req.currentUserId;
-        const result = await myPetService.getMyPet(userId);
+        const petStorageId = await myPetService.getPetStorageIdByUserId(userId);
+        const result = await myPetService.getPetStorageByPetStorageId(petStorageId);
         return result;
+    })
+);
+
+// myPet 단일 조회
+myPetRouter.get('/:myPetId', asyncHandler(async (req, res, next) => { 
+    const myPetId = req.param;
+    const petStorageId = await myPetService.getPetStorageIdByUserId(req.currentUserId);
+    console.log(myPetId);
+    console.log(petStorageId);
+    const result = await myPetService.getMyPetById(
+        petStorageId,
+        myPetId
+    );
+    return result;
     })
 );
 
 // myPet 저장
 myPetRouter.post(
-    '/',
+    '/:myPetId',
     asyncHandler(async (req, res, next) => {
         const userId = req.currentUserId;
         const lowestLevelPet = await petService.getLowestLevel();

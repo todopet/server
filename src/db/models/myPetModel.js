@@ -11,23 +11,15 @@ class MyPetModel {
 
     async findByUserId(userId) {
         return await MyPet.findOne({ userId }).lean();
+        
     }
     async findByPetStorageId(petStorageId) {
         return await MyPet.findOne({ _id: petStorageId }).lean();
     }
 
-    async create(userId, pet, myPetName) {
+    async create(petStorage) {
         return (
-            await MyPet.create({
-                userId: userId,
-                pets: [
-                    {
-                        pet: pet._id, // petId 대신에 pet 객체의 ID를 저장
-                        myPetName
-                    }
-                ]
-            })
-        ).toObject();
+            await MyPet.create(petStorage)).toObject();
     }
 
     async update(petStorageId, myPet) {
