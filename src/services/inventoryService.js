@@ -225,6 +225,45 @@
                 items: inventory.items
             });
         }
+        async addSelectedItemToInventory(userId, itemId, quantity) {
+            const inventoryId = await this.getInventoryIdByUserId(userId);
+            
+            const inventory = await this.inventoryModel.findByInventoryId(
+                inventoryId
+            );
+    
+            if (!inventory) {
+                throw new Error('Inventory not found');
+            }
+    
+            const existingItemIndex = inventory.items.findIndex(
+                (item) => item.item.toString() === itemId
+            );
+    
+            if (existingItemIndex !== -1) {
+                // 이미 있는 아이템인 경우 수량 증가
+                inventory.items[existingItemIndex].quantity += quantity;
+            } else {
+                // 아이템 정보 가져오기
+                const itemInfo = await this.itemService.getItem(itemId);
+    
+                if (!itemInfo) {
+                    throw new Error('Item not found');
+                }
+    
+                // 새로운 아이템 추가
+                inventory.items.push({
+                    item: itemId,
+                    quantity,
+                    info: itemInfo
+                });
+            }
+    
+            // 인벤토리 업데이트 시에는 inventoryId를 사용
+            return await this.inventoryModel.update(inventoryId, {
+                items: inventory.items
+            });
+        }
     }
 
     export default InventoryService;

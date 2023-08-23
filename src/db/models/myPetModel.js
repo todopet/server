@@ -11,15 +11,22 @@ class MyPetModel {
 
     async findByUserId(userId) {
         return await MyPet.findOne({ userId }).lean();
-        
     }
     async findByPetStorageId(petStorageId) {
         return await MyPet.findOne({ _id: petStorageId }).lean();
     }
 
     async create(petStorage) {
-        return (
-            await MyPet.create(petStorage)).toObject();
+        return (await MyPet.create(petStorage)).toObject();
+    }
+
+    async createPetStorage(userId, petId) {
+        const petStorage = {
+            userId: userId,
+            pet: petId
+        };
+
+        return await MyPet.create(petStorage);
     }
 
     async update(petStorageId, myPet) {

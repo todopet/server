@@ -13,37 +13,38 @@ myPetRouter.get(
     asyncHandler(async (req, res, next) => {
         const userId = req.currentUserId;
         const petStorageId = await myPetService.getPetStorageIdByUserId(userId);
-        const result = await myPetService.getPetStorageByPetStorageId(petStorageId);
+        const result = await myPetService.getPetStorageByPetStorageId(
+            petStorageId
+        );
         return result;
     })
 );
 
 // myPet 단일 조회
-myPetRouter.get('/:myPetId', asyncHandler(async (req, res, next) => { 
-    const myPetId = req.param;
-    const petStorageId = await myPetService.getPetStorageIdByUserId(req.currentUserId);
-    console.log(myPetId);
-    console.log(petStorageId);
-    const result = await myPetService.getMyPetById(
-        petStorageId,
-        myPetId
-    );
-    return result;
+myPetRouter.get(
+    '/:myPetId',
+    asyncHandler(async (req, res, next) => {
+        const myPetId = req.params.myPetId;
+        const petStorageId = await myPetService.getPetStorageIdByUserId(
+            req.currentUserId
+        );
+        const result = await myPetService.getMyPetById(petStorageId, myPetId);
+        return result;
     })
 );
 
-// myPet 저장
+// myPet 생성
 myPetRouter.post(
-    '/:myPetId',
+    '/',
     asyncHandler(async (req, res, next) => {
         const userId = req.currentUserId;
-        const lowestLevelPet = await petService.getLowestLevel();
-        const { myPetName } = req.body;
-        const result = await myPetService.addMyPet(
-            userId,
-            lowestLevelPet._id,
-            myPetName
-        );
+        const { level } = req.body;
+
+        // 펫 레벨에 따라 해당 레벨의 펫을 가져옵니다.
+        const pet = await myPetService.getPetByLevel(level);
+
+        const result = await myPetService.addMyPet(userId, pet._id);
+
         return result;
     })
 );
@@ -53,12 +54,10 @@ myPetRouter.patch(
     '/:myPetId',
     asyncHandler(async (req, res, next) => {
         const { myPetId } = req.params;
-        const updatedInfo = req.body; // 수정할 정보
-
-        const result = await myPetService.updatePetInMyPet(
-            myPetId,
-            updatedInfo
-        );
+        console.log(myPetId);
+        const updatedFields = req.body; // 수정할 정보
+        console.log(updatedFields);
+        const result = await myPetService.updatePetInMyPet(myPetId, updatedFields);
         return result;
     })
 );
@@ -69,11 +68,14 @@ myPetRouter.delete(
     asyncHandler(async (req, res, next) => {
         const { myPetId } = req.params;
 
-        const petStorageId = await myPetService.getPetStorageIdByUserId(req.currentUserId);
+        const petStorageId = await myPetService.getPetStorageIdByUserId(
+            req.currentUserId
+        );
 
-
-        const result = await myPetService.deletePetInMyPet(petStorageId,
-            myPetId);
+        const result = await myPetService.deletePetInMyPet(
+            petStorageId,
+            myPetId
+        );
         return result;
     })
 );

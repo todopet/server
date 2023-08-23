@@ -1,11 +1,14 @@
-import { model } from "mongoose";
-import { petSchema } from "../schemas/index.js";
+import { model } from 'mongoose';
+import { petSchema } from '../schemas/index.js';
 
-const Pet = model("pets", petSchema);
+const Pet = model('pets', petSchema);
 
 class PetModel {
     async findLowestLevel() {
         return await Pet.findOne({ level: 0 }).lean();
+    }
+    async findByLevel(level) {
+        return await Pet.findOne({ level }).lean();
     }
     async findById(id) {
         return await Pet.findById(id).lean();
@@ -17,7 +20,9 @@ class PetModel {
         return (await Pet.create(pet)).toObject();
     }
     async update(id, pet) {
-        const updatedPet = await Pet.findByIdAndUpdate(id, pet, { new: true }).lean();
+        const updatedPet = await Pet.findByIdAndUpdate(id, pet, {
+            new: true
+        }).lean();
         return updatedPet;
     }
     async delete(id) {
