@@ -5,9 +5,6 @@ const Pet = model("pets", petSchema);
 
 class PetModel {
     async findLowestLevel() {
-        console.log(await Pet.findOne({ level: 0 }).lean());
-        console.log("aa");
-
         return await Pet.findOne({ level: 0 }).lean();
     }
     async findById(id) {

@@ -48,8 +48,8 @@ class TodoContentService {
         return await this.todoContentModel.update(content);
     }
 
-    async deleteContent(categoryId, contentId) {
-        return await this.todoContentModel.delete(categoryId, contentId);
+    async deleteContent(id) {
+        return await this.todoContentModel.delete(id);
     }
 }
 

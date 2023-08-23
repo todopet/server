@@ -9,36 +9,8 @@ const myPetSchema = new Schema(
         pets: [
             {
                 pet: {
-                    type: Schema.Types.ObjectId
-                },
-                myPetName: {
-                    type: String,
+                    type: Schema.Types.ObjectId,
                     required: true
-                },
-                // 경험치
-                experience: {
-                    type: Number,
-                    default: 0
-                },
-                // 포만감
-                curHunger: {
-                    type: Number,
-                    default: 0
-                },
-                // 친밀도
-                curAffection: {
-                    type: Number,
-                    default: 0
-                },
-                // 청결도
-                curCleanliness: {
-                    type: Number,
-                    default: 0
-                },
-                // 컨디션
-                curCondition: {
-                    type: Number,
-                    default: 0
                 }
             }
         ]
