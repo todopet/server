@@ -1,11 +1,12 @@
 import { TodoContentModel, TodoCategoryModel } from '../db/models/index.js';
-import { HistoryService } from '../services/index.js';
+import { HistoryService, RewardService } from '../services/index.js';
 
 class TodoContentService {
     constructor() {
         this.todoContentModel = new TodoContentModel();
         this.todoCategoryModel = new TodoCategoryModel();
         this.historyService = new HistoryService();
+        this.rewardService = new RewardService();
     }
 
     async getMultipleContents(userId) {
@@ -39,7 +40,7 @@ class TodoContentService {
         // 히스토리 없으면 보상 지급 및 히스토리 추가
         if (!history.length) {
             // 보상 지급
-            await this.rewardService.addReward(userId);
+            await this.rewardService.giveReward(userId);
             // 히스토리 추가
             await this.historyService.addHistory(userId, id);
         }
