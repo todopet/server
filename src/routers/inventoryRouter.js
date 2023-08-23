@@ -43,8 +43,8 @@ inventoryRouter.post(
     '/addItem',
     asyncHandler(async (req, res, next) => {
         const { itemId, quantity } = req.body;
-        const result = await inventoryService.addItemToInventory(
-            req.user.userId, // 사용자 ID로 인벤토리 ID 얻음
+        const result = await inventoryService.addSelectedItemToInventory(
+            req.currentUserId, // 사용자 ID로 인벤토리 ID 얻음
             itemId,
             quantity
         );
