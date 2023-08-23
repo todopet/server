@@ -1,10 +1,11 @@
 import { UserModel } from "../db/models/index.js";
-import InventoryService from "./inventoryService.js";
+import { InventoryService, MyPetService } from "./index.js";
 
 class UserService {
     constructor() {
         this.userModel = new UserModel();
         this.inventoryService = new InventoryService();
+        this.myPetService = new MyPetService();
     }
     async addUser(userInfo) {
         const { googleId, picture } = userInfo;
@@ -26,8 +27,18 @@ class UserService {
         };
         const createdNewUser = await this.userModel.create(newUserInfo);
 
-        const inventoryService = new InventoryService();
-        await inventoryService.addInventory(createdNewUser._id, []);
+        // 아래와 같이 이미 인벤토리가 있는지 여부를 체크하여 생성 여부를 결정합니다.
+        const existingInventory = await this.inventoryService.getInventoryByUserId(createdNewUser._id);
+        if (!existingInventory) {
+            // 인벤토리가 없을 경우에만 생성
+            await this.inventoryService.addInventory(createdNewUser._id, []);
+        }
+
+        // 펫보관함 생성 로직 추가
+        const existingPetStorage = await this.myPetService.getMyPet(createdNewUser._id);
+        if (!existingPetStorage) {
+            await this.myPetService.addPetStorage(createdNewUser._id, []);
+        }
 
         return createdNewUser; // 사용자 정보 반환
     }

@@ -74,9 +74,6 @@ authRouter.get(
 
         if (!user) {
             user = await userService.addUser(resp2.data);
-            // 수정된 부분: inventoryService.addInventory 호출로 변경
-            const inventoryService = new InventoryService();
-            await inventoryService.addInventory(user._id, []);
         }
 
         const token = jwt.sign(user._id);
