@@ -17,7 +17,7 @@ import {
 
 export {
     UserModel,
-    TodoContentModel,
+    // TodoContentModel,
     TodoCategoryModel,
     HistoryModel,
     ItemModel,
@@ -32,16 +32,18 @@ export {
 // const todoContentMongooseModel = model('todoContents', todoContentSchema);
 // const todoHistoryMongooseModel = model('histories', historySchema);
 
-const todoCategoryModel = model('todoCategories', todoCategorySchema);
-const todoContentModel = model('todoContents', todoContentSchema);
-const historyModel = model('histories', historySchema);
+const todoCategoryMongooseModel = model('todoCategories', todoCategorySchema);
+const todoContentMongooseModel = model('todoContents', todoContentSchema);
+const HistoryMongooseModel = model('histories', historySchema);
 
-// const todoCategoryModel = new TodoCategoryModel(
-//     todoCategoryMongooseModel,
-//     todoContentMongooseModel,
-//     todoHistoryMongooseModel
-// );
+const todoContentModel = new TodoContentModel(
+    todoCategoryMongooseModel,
+    todoContentMongooseModel,
+    HistoryMongooseModel
+);
+// const todoCategoryModel = new TodoCategoryModel(todoCategoryMongooseModel);
+export { todoContentModel };
 // const todoContentModel = new TodoContentModel(todoContentMongooseModel);
 // const historyModel = new HistoryModel(todoHistoryMongooseModel);
 
-export { todoCategoryModel, todoContentModel, historyModel };
+// export { todoCategoryModel, todoContentModel, historyModel };

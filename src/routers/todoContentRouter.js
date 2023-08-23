@@ -11,8 +11,13 @@ todoContentRouter.get(
     '/',
     asyncHandler(async (req, res, next) => {
         const userId = req.currentUserId;
-        // const { start, end } = req.body;
-        const contents = await todoContentService.getMultipleContents(userId);
+        const start = req.query.start;
+        const end = req.query.end;
+        const contents = await todoContentService.getMultipleContents(
+            userId,
+            start,
+            end
+        );
         return contents;
     })
 );

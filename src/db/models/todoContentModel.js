@@ -1,14 +1,22 @@
 import mongoose from 'mongoose';
-import { todoCategoryModel, todoContentModel, historyModel } from './index.js';
+// import { todoCategoryModel, todoContentModel, historyModel } from './index.js';
 
 class TodoContentModel {
-    constructor() {
+    constructor(todoCategoryModel, todoContentModel, historyModel) {
         this.todoCategoryModel = todoCategoryModel;
         this.todoContentModel = todoContentModel;
         this.historyModel = historyModel;
     }
-    async findByCategoryId(id) {
-        return await this.todoContentModel.find({ categoryId: id }).lean();
+    async findByCategoryId(id, start, end) {
+        return await this.todoContentModel
+            .find({
+                categoryId: id,
+                createdAt: {
+                    $gte: start,
+                    $lte: end
+                }
+            })
+            .lean();
     }
     async findById(id) {
         return await this.todoContentModel.findById(id).lean();
