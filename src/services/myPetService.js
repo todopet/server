@@ -128,6 +128,82 @@ class MyPetService {
         return petToUpdate; // 업데이트된 펫 정보를 반환
     }
 
+    async updatePetWithItemEffect(userId, statuses, effect, experience) {
+        const petStorageId = await this.getPetStorageIdByUserId(userId);
+        const petStorage = await this.getPetStorageByPetStorageId(petStorageId);
+
+        const updatedPet = { ...petStorage };
+
+        // 경험치 업데이트
+        updatedPet.experience += experience;
+
+        // 경험치가 최대 경험치를 넘어가면 레벨 업 처리
+        const maxExperience = await this.getMaxExperienceByPetLevel(
+            updatedPet.level
+        );
+        if (updatedPet.experience >= maxExperience) {
+            updatedPet.experience = updatedPet.experience - maxExperience;
+            updatedPet.level += 1;
+
+            // 레벨에 따른 상태 최대치 업데이트
+            const maxStatuses = await this.getMaxStatusesByPetLevel(
+                updatedPet.level
+            );
+            updatedPet.health = maxStatuses.health;
+            updatedPet.hunger = maxStatuses.hunger;
+            updatedPet.happiness = maxStatuses.happiness;
+            updatedPet.cleanliness = maxStatuses.cleanliness;
+            updatedPet.condition = maxStatuses.condition;
+        }
+
+        // 아이템의 상태에 따라 펫 정보 업데이트
+        statuses.forEach((status) => {
+            if (updatedPet[status] !== undefined) {
+                updatedPet[status] = Math.min(
+                    updatedPet[status] + effect,
+                    updatedPet[status]
+                );
+            }
+        });
+
+        // 펫 정보 업데이트
+        return await this.updatePetInMyPet(
+            petStorageId,
+            updatedPet._id,
+            updatedPet
+        );
+    }
+
+    // 다른 메서드들...
+
+    async getMaxStatusesByPetLevel(level) {
+        const petByLevel = await this.getPetByLevel(level);
+
+        if (!petByLevel) {
+            throw new Error(`Pet information not found for level: ${level}`);
+        }
+
+        const maxStatuses = {
+            health: petByLevel.health,
+            hunger: petByLevel.hunger,
+            happiness: petByLevel.happiness,
+            cleanliness: petByLevel.cleanliness,
+            condition: petByLevel.condition
+        };
+
+        return maxStatuses;
+    }
+
+    async getMaxExperienceByPetLevel(level) {
+        const petByLevel = await this.getPetByLevel(level);
+
+        if (!petByLevel) {
+            throw new Error(`Pet information not found for level: ${level}`);
+        }
+
+        return petByLevel.experience;
+    }
+
     async deletePetInMyPet(petStorageId, myPetId) {
         const petStorage = await this.myPetModel.findByPetStorageId(
             petStorageId
