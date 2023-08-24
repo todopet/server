@@ -1,4 +1,5 @@
-import { Schema } from "mongoose";
+import { Schema } from 'mongoose';
+import petSchema from './petSchema.js';
 
 const myPetSchema = new Schema(
     {
@@ -8,10 +9,7 @@ const myPetSchema = new Schema(
         },
         pets: [
             {
-                pet: {
-                    type: Schema.Types.ObjectId,
-                    required: true
-                }
+                pet: petSchema
             }
         ]
     },
