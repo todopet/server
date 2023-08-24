@@ -40,16 +40,19 @@ class TodoContentService {
         const { id, userId, todo, status } = content;
         // 히스토리 조회
         const history = await this.historyService.getHistory(userId, id);
+
+        let reward = null;
         // 히스토리 없으면 보상 지급 및 히스토리 추가
-        if (!history.length) {
+        if (!history.length && status === 'completed') {
             // 보상 지급
-            await this.rewardService.giveReward(userId);
+            reward = await this.rewardService.giveReward(userId);
             // 히스토리 추가
             await this.historyService.addHistory(userId, id);
         }
-
+        const result = await todoContentModel.update(content);
+        result.reward = reward;
         // 내용 업데이트 (완료처리 or 내용 수정)
-        return await todoContentModel.update(content);
+        return result;
     }
 
     async deleteContent(id) {
