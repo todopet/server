@@ -20,7 +20,7 @@ petRouter.get(
 petRouter.get(
     '/',
     asyncHandler(async (req, res, next) => {
-        const allPets = await petService.getAllPets(); // 새로운 메서드 추가
+        const result = await petService.getAllPets(); // 새로운 메서드 추가
         return result;
     })
 );

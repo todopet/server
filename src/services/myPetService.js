@@ -20,15 +20,15 @@ class MyPetService {
         return petStorage._id.toString();
     }
 
-    async getMyPetById(petStorageId, myPetId) {
+    // myPet 단일 조회
+    async getMyPetByPetId(petStorageId, petId) {
         const petStorage = await this.getPetStorageByPetStorageId(petStorageId);
+        const pet = petStorage.pets.find((p) => p._id.toString() === petId);
 
-        const pet = petStorage.pets.find(
-            (pet) => pet._id.toString() === myPetId
-        );
         if (!pet) {
-            throw new Error('pet not found in petStorage');
+            throw new Error('Pet not found in petStorage');
         }
+
         return pet;
     }
 
@@ -36,22 +36,12 @@ class MyPetService {
         const petStorage = await this.myPetModel.findByPetStorageId(
             petStorageId
         );
+
         if (!petStorage) {
             throw new Error('PetStorage not found');
         }
-        const myPetWithInfo = await Promise.all(
-            petStorage.pets.map(async (pet) => {
-                const petInfo = await this.petService.getPet(pet.pet);
-                return {
-                    ...pet,
-                    info: petInfo
-                };
-            })
-        );
-        return {
-            ...petStorage,
-            pets: myPetWithInfo
-        };
+
+        return petStorage;
     }
 
     async getPetByLevel(level) {
@@ -69,18 +59,31 @@ class MyPetService {
         // 0 레벨 펫을 가져옴
         const lowestLevelPet = await petService.getLowestLevel();
 
-        // pets 배열에 0 레벨 펫을 추가하여 petStorage 생성
+        // pets 배열에 0 레벨 펫과 추가 정보를 추가하여 petStorage 생성
         const petStorage = await this.myPetModel.create({
             userId: userId.toString(),
-            pets: [{ pet: lowestLevelPet._id }] // 펫의 ObjectId를 객체로 감싸서 할당
+            pets: [
+                {
+                    pet: lowestLevelPet
+                }
+            ]
         });
-
         return petStorage;
     }
 
     async addMyPet(userId, petId) {
         const pet = await this.petService.getPet(petId);
 
+        // 펫 정보를 생성
+        const petInfo = {
+            petName: pet.petName,
+            level: pet.level,
+            experience: pet.experience,
+            hunger: pet.hunger,
+            affection: pet.affection,
+            cleanliness: pet.cleanliness,
+            condition: pet.condition
+        };
         // 기존 petStorage 가져오기
         const petStorageId = await this.getPetStorageIdByUserId(userId);
         const petStorage = await this.myPetModel.findByPetStorageId(
@@ -88,28 +91,41 @@ class MyPetService {
         );
 
         // 기존 petStorage의 pets 배열에 펫을 추가
-        petStorage.pets.push({ pet: pet._id });
+        petStorage.pets.push({
+            pet: pet
+        });
 
         // 수정된 petStorage 저장
-        await this.myPetModel.update(petStorageId, petStorage);
+        const updatedPetStorage = await this.myPetModel.update(
+            petStorageId,
+            petStorage
+        );
 
-        return petStorage;
+        return updatedPetStorage; // 업데이트된 petStorage를 반환
     }
 
     //펫 정보 각각 업데이트
-    async updatePetInMyPet(myPetId, updatedFields) {
-        console.log(myPetId);
-        console.log(updatedFields);
-        const myPet = await this.myPetModel.findById(myPetId);
-        console.log(myPet);
-        if (!myPet) {
-            return { error: 'MyPet not found', data: null };
+    async updatePetInMyPet(petStorageId, petId, updatedFields) {
+        const petStorage = await this.getPetStorageByPetStorageId(petStorageId);
+
+        const petToUpdate = petStorage.pets.find(
+            (pet) => pet._id.toString() === petId
+        );
+
+        if (!petToUpdate) {
+            throw new Error('Pet not found in petStorage');
         }
 
-        Object.assign(myPet.info, updatedFields); // 요청의 필드들을 업데이트
-        const updatedMyPet = await this.myPetModel.update(myPetId, myPet);
+        // 기존 정보를 업데이트할 필드로 덮어씌웁니다.
+        Object.assign(petToUpdate.pet, updatedFields);
 
-        return { error: null, data: updatedMyPet };
+        // 전체 petStorage 객체를 업데이트합니다 (업데이트된 펫을 포함)
+        const updatedPetStorage = await this.myPetModel.update(
+            petStorageId,
+            petStorage
+        );
+
+        return petToUpdate; // 업데이트된 펫 정보를 반환
     }
 
     async deletePetInMyPet(petStorageId, myPetId) {

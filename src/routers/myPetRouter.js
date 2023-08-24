@@ -16,7 +16,7 @@ myPetRouter.get(
         const result = await myPetService.getPetStorageByPetStorageId(
             petStorageId
         );
-        return result;
+        return result; // 이 부분을 수정합니다.
     })
 );
 
@@ -28,7 +28,10 @@ myPetRouter.get(
         const petStorageId = await myPetService.getPetStorageIdByUserId(
             req.currentUserId
         );
-        const result = await myPetService.getMyPetById(petStorageId, myPetId);
+        const result = await myPetService.getMyPetByPetId(
+            petStorageId,
+            myPetId
+        );
         return result;
     })
 );
@@ -54,10 +57,15 @@ myPetRouter.patch(
     '/:myPetId',
     asyncHandler(async (req, res, next) => {
         const { myPetId } = req.params;
-        console.log(myPetId);
         const updatedFields = req.body; // 수정할 정보
-        console.log(updatedFields);
-        const result = await myPetService.updatePetInMyPet(myPetId, updatedFields);
+        const petStorageId = await myPetService.getPetStorageIdByUserId(
+            req.currentUserId
+        );
+        const result = await myPetService.updatePetInMyPet(
+            petStorageId,
+            myPetId,
+            updatedFields
+        );
         return result;
     })
 );

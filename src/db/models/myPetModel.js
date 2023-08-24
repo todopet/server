@@ -14,6 +14,7 @@ class MyPetModel {
     }
     async findByPetStorageId(petStorageId) {
         return await MyPet.findOne({ _id: petStorageId }).lean();
+        //return await MyPet.findById(petStorageId).lean();
     }
 
     async create(petStorage) {
