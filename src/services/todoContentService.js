@@ -37,11 +37,13 @@ class TodoContentService {
     }
 
     async updateContent(content) {
-        const { id, userId, status, date } = content;
+        const { id, userId, status } = content;
         // 내용 또는 상태 수정
         const result = await todoContentModel.update(content);
+
         // 히스토리 조회 (해당 날짜의 히스토리 조회)
-        const history = await this.historyService.getHistories(userId, date);
+        const history = await this.historyService.getHistories(userId);
+
         // 특정 todo에 대한 히스토리 존재 여부 확인
         const isHistory = history.find((data) => data.contentId === id);
 
