@@ -37,21 +37,42 @@ class TodoContentService {
     }
 
     async updateContent(content) {
-        const { id, userId, todo, status } = content;
-        // 히스토리 조회
-        const history = await this.historyService.getHistory(userId, id);
+        const { id, userId, status, date } = content;
+        // 내용 또는 상태 수정
+        const result = await todoContentModel.update(content);
+        // 히스토리 조회 (해당 날짜의 히스토리 조회)
+        const history = await this.historyService.getHistories(userId, date);
+        // 특정 todo에 대한 히스토리 존재 여부 확인
+        const isHistory = history.find((data) => data.contentId === id);
 
-        let reward = null;
-        // 히스토리 없으면 보상 지급 및 히스토리 추가
-        if (!history.length && status === 'completed') {
-            // 보상 지급
-            reward = await this.rewardService.giveReward(userId);
+        let message = null;
+
+        // 히스토리가 존재하지 않으면 보상 지급 및 히스토리 추가
+        if (!isHistory && status === 'completed') {
+            // 히스토리가 하루 10개 이상 있을 경우 보상을 지급하지 않는다.
+            if (history.length < 10) {
+                // 보상 지급
+                const reward = await this.rewardService.giveReward(userId);
+                message = {
+                    content: '아이템 획득!',
+                    reward: reward.name
+                };
+            } else {
+                message = {
+                    content: '오늘 보상 최대치를 받았습니다.',
+                    reward: null
+                };
+            }
             // 히스토리 추가
             await this.historyService.addHistory(userId, id);
+        } else if (status === 'completed') {
+            message = {
+                content: '이미 보상을 수령하였습니다',
+                reward: null
+            };
         }
-        const result = await todoContentModel.update(content);
-        result.reward = reward;
-        // 내용 업데이트 (완료처리 or 내용 수정)
+
+        result.message = message;
         return result;
     }
 
