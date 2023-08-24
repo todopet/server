@@ -1,4 +1,4 @@
-import { PetModel } from "../db/models/index.js";
+import { PetModel } from '../db/models/index.js';
 
 class PetService {
     constructor() {
