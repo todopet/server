@@ -88,7 +88,9 @@ class InventoryService {
     }
     async getInventoryItemByInventoryItemId(userId, inventoryItemId) {
         const inventoryId = await this.getInventoryIdByUserId(userId);
-        const inventory = await this.inventoryModel.findByInventoryId(inventoryId);
+        const inventory = await this.inventoryModel.findByInventoryId(
+            inventoryId
+        );
 
         if (!inventory) {
             throw new Error('Inventory not found');
@@ -169,7 +171,7 @@ class InventoryService {
         }
 
         const existingItemIndex = inventory.items.findIndex(
-            (item) => item._id.toString() === inventoryItemId
+            (item) => item.item.toString() === inventoryItemId
         );
 
         if (existingItemIndex !== -1) {
