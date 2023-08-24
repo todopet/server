@@ -129,78 +129,134 @@ class MyPetService {
     }
 
     async updatePetWithItemEffect(userId, statuses, effect, experience) {
+        // 64e6d41a3a66926a9ec9fb47
+        // [ 'hunger' ]
+        // 30
+        // 80
         const petStorageId = await this.getPetStorageIdByUserId(userId);
+        //console.log(petStorageId);
+        //64e6d41a3a66926a9ec9fb4e
         const petStorage = await this.getPetStorageByPetStorageId(petStorageId);
-
+        //console.log(petStorage);
+        // {
+        //     _id: new ObjectId("64e6d41a3a66926a9ec9fb4e"),
+        //     userId: new ObjectId("64e6d41a3a66926a9ec9fb47"),
+        //     pets: [ { pet: [Object], _id: new ObjectId("64e6d41a3a66926a9ec9fb4f") } ],
+        //     createdAt: 2023-08-24T03:52:58.270Z,
+        //     updatedAt: 2023-08-24T03:54:43.735Z
+        //   }
         const updatedPet = { ...petStorage };
+        const myPetExperience = updatedPet.pets[0].pet.experience;
+        const myPetLevel = updatedPet.pets[0].pet.level;
+        let myPetHunger = updatedPet.pets[0].pet.hunger;
+        let myPetAffection = updatedPet.pets[0].pet.affection;
+        let myPetCleanliness = updatedPet.pets[0].pet.cleanliness;
+        let myPetCondition = updatedPet.pets[0].pet.condition;
+        //console.log(updatedPet.pets[0].pet.level); // 0
+        //console.log(updatedPet.pets[0].pet.experience) // 100
 
-        // 경험치 업데이트
-        updatedPet.experience += experience;
-
+        // 경험치에 아이템 경험치를 더해줌
+        const updateMyPetExperience = myPetExperience + experience;
+        // console.log(updateMyPetExperience);
+        //180
+        // console.log(myPetLevel);
+        //0
         // 경험치가 최대 경험치를 넘어가면 레벨 업 처리
-        const maxExperience = await this.getMaxExperienceByPetLevel(
-            updatedPet.level
-        );
-        if (updatedPet.experience >= maxExperience) {
-            updatedPet.experience = updatedPet.experience - maxExperience;
-            updatedPet.level += 1;
+        const maxExperience = await this.getMaxExperienceByPetLevel(myPetLevel); //0레벨 펫의 maxExperience는 100 임
+        if (updateMyPetExperience >= maxExperience) {
+            // 업데이트 된 펫의 경험치가 최대 경험치보다 크거나 같으면
+            const updateMyPetLevel = myPetLevel + 1;
+            //console.log(updateMyPetLevel);
+            //펫 레벨을 1 올림
 
             // 레벨에 따른 상태 최대치 업데이트
             const maxStatuses = await this.getMaxStatusesByPetLevel(
-                updatedPet.level
+                updateMyPetLevel
             );
-            updatedPet.health = maxStatuses.health;
-            updatedPet.hunger = maxStatuses.hunger;
-            updatedPet.happiness = maxStatuses.happiness;
-            updatedPet.cleanliness = maxStatuses.cleanliness;
-            updatedPet.condition = maxStatuses.condition;
+            //console.log(maxStatuses);
+            //{ hunger: 120, affection: 120, cleanliness: 120, condition: 120 }
+            //이렇게 저장되니 펫의 정보를 업데이트 해준다
+
+            myPetHunger = maxStatuses.hunger;
+            myPetAffection = maxStatuses.affection;
+            myPetCleanliness = maxStatuses.cleanliness;
+            myPetCondition = maxStatuses.condition;
+            console.log(myPetHunger);
+            console.log(myPetAffection);
+            //여기까지가 마이펫 경험가 레벨별 최대 경험치보다 높으면 레벨과 상태를 업데이트함
+        } else {
+            // 여기서부터 아이템 써서 상태 업데이트
+            // statuses는 아이템의 효과 [배고픔, 청결, 애정, 컨디션] 중 선택
+            statuses.forEach((status) => {
+                if (updatedPet.pets[0].pet.status !== undefined) {
+                    updatedPet[status] = Math.min(
+                        updatedPet[status] + effect,
+                        updatedPet[status]
+                    );
+                }
+            });
+
+            // 펫 정보 업데이트
+            return await this.updatePetInMyPet(
+                petStorageId,
+                updatedPet._id,
+                updatedPet
+            );
         }
-
-        // 아이템의 상태에 따라 펫 정보 업데이트
-        statuses.forEach((status) => {
-            if (updatedPet[status] !== undefined) {
-                updatedPet[status] = Math.min(
-                    updatedPet[status] + effect,
-                    updatedPet[status]
-                );
-            }
-        });
-
-        // 펫 정보 업데이트
-        return await this.updatePetInMyPet(
-            petStorageId,
-            updatedPet._id,
-            updatedPet
-        );
     }
-
-    // 다른 메서드들...
 
     async getMaxStatusesByPetLevel(level) {
         const petByLevel = await this.getPetByLevel(level);
-
+        //console.log(petByLevel);
+        //console.log(petByLevel.hunger);
+        // 1레벨 펫을 가져옴
+        // {
+        //     _id: new ObjectId("64e6c6519b632828d15ad759"),
+        //     petName: '새싹',
+        //     level: 1,
+        //     experience: 300,
+        //     hunger: 120,
+        //     affection: 120,
+        //     cleanliness: 120,
+        //     condition: 120,
+        //     createdAt: 2023-08-24T02:54:09.087Z,
+        //     updatedAt: 2023-08-24T02:54:09.087Z
+        //   }
         if (!petByLevel) {
             throw new Error(`Pet information not found for level: ${level}`);
         }
 
         const maxStatuses = {
-            health: petByLevel.health,
             hunger: petByLevel.hunger,
-            happiness: petByLevel.happiness,
+            affection: petByLevel.affection,
             cleanliness: petByLevel.cleanliness,
             condition: petByLevel.condition
         };
-
+        //console.log(maxStatuses);
+        //{ hunger: 120, affection: 120, cleanliness: 120, condition: 120 }
         return maxStatuses;
     }
 
     async getMaxExperienceByPetLevel(level) {
+        //레벨이 0인 경우
         const petByLevel = await this.getPetByLevel(level);
-
+        // console.log(petByLevel);
+        // {
+        //     _id: new ObjectId("64e6c64a9b632828d15ad757"),
+        //     petName: '씨앗',
+        //     level: 0,
+        //     experience: 100,
+        //     hunger: 100,
+        //     affection: 100,
+        //     cleanliness: 100,
+        //     condition: 100,
+        //     createdAt: 2023-08-24T02:54:02.648Z,
+        //     updatedAt: 2023-08-24T02:54:02.648Z
+        //   }
         if (!petByLevel) {
             throw new Error(`Pet information not found for level: ${level}`);
         }
-
+        // console.log(petByLevel.experience); //100
         return petByLevel.experience;
     }
 
