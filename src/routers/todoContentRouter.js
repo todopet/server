@@ -45,21 +45,19 @@ todoContentRouter.post(
     })
 );
 
-// 계획(todo) 수정 - 계획 처리
-// 여기서 보상 지급, 히스토리 넣기.
+// 계획(todo) 수정 - 계획 처리 및 보상 지급, 히스토리 등록
 todoContentRouter.patch(
     '/:id',
     asyncHandler(async (req, res, next) => {
         const userId = req.currentUserId;
         const { id } = req.params;
-        const { todo, status } = req.body;
-        // 처리하면 상태 변화 해줘야 함 그리고 보상 줘야함
-        // 처리한걸 취소하고 다시 체크하면 보상 주면 안됨
+        const { todo, status, date } = req.body;
         const response = await todoContentService.updateContent({
             id,
             userId,
             todo,
-            status
+            status,
+            date
         });
 
         return response;
