@@ -1,12 +1,12 @@
 import { Router } from 'express';
-import { InventoryService } from '../services/index.js';
+import { InventoryService, MyPetService } from '../services/index.js';
 import { buildResponse } from '../misc/utils.js';
 import asyncHandler from '../middlewares/asyncHandler.js';
 import userAuthorization from '../middlewares/userAuthorization.js';
 
 const inventoryRouter = Router();
 const inventoryService = new InventoryService();
-
+const myPetService = new MyPetService();
 // 인벤토리 조회
 inventoryRouter.get(
     '/',
@@ -35,6 +35,49 @@ inventoryRouter.get(
             inventoryItemId
         );
         return result;
+    })
+);
+
+//아이템 사용
+inventoryRouter.post(
+    '/:inventoryItemId/use',
+    asyncHandler(async (req, res, next) => {
+        const { inventoryItemId } = req.params;
+        const userId = req.currentUserId;
+
+        // 인벤토리 아이템 정보 가져오기
+        const inventoryItem =
+            await inventoryService.getInventoryItemByInventoryItemId(
+                userId,
+                inventoryItemId
+            );
+
+        if (!inventoryItem) {
+            throw new Error('Inventory item not found');
+        }
+
+        // 아이템 사용에 따른 펫 정보 업데이트
+        const updatedPet = await myPetService.updatePetWithItemEffect(
+            userId,
+            inventoryItem.info.status,
+            inventoryItem.info.effect,
+            inventoryItem.info.experience
+        );
+
+        // 아이템 사용 및 인벤토리 업데이트
+        const itemUsed = await inventoryService.useItemAndUpdateInventory(
+            userId,
+            inventoryItemId
+        );
+
+        if (!itemUsed) {
+            throw new Error(
+                'Failed to use item or item not found in inventory'
+            );
+        }
+
+        // 아이템 사용 결과 및 업데이트된 펫 정보 반환
+        res.json(buildResponse({ updatedPet }));
     })
 );
 
