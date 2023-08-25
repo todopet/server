@@ -113,7 +113,7 @@ inventoryRouter.patch(
             inventoryItemId,
             quantity
         );
-        res.json(buildResponse(result));
+        return result;
     })
 );
 
