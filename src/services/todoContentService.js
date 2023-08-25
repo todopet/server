@@ -57,7 +57,8 @@ class TodoContentService {
                 const reward = await this.rewardService.giveReward(userId);
                 message = {
                     content: '아이템 획득!',
-                    reward: reward.name
+                    reward: reward.name,
+                    status: reward.status
                 };
             } else {
                 message = {
