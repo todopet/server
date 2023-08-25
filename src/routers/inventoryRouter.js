@@ -113,14 +113,7 @@ inventoryRouter.patch(
             inventoryItemId,
             quantity
         );
-
-        res.status(200).json({
-            error: null,
-            data: {
-                status: 200,
-                message: 'success'
-            }
-        });
+        res.json(buildResponse(result));
     })
 );
 
