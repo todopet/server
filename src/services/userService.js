@@ -1,5 +1,9 @@
-import { UserModel } from "../db/models/index.js";
-import { InventoryService, MyPetService } from "./index.js";
+import { UserModel } from '../db/models/index.js';
+import { InventoryService, MyPetService } from './index.js';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc.js';
+
+dayjs.extend(utc);
 
 class UserService {
     constructor() {
@@ -12,11 +16,11 @@ class UserService {
 
         const user = await this.userModel.findByGoogleId(googleId);
         if (user) {
-            if (user.membershipStatus === "withdrawn") {
-                await this.updateMembershipStatus(user._id, "active");
-                return "Signup Success (Membership Restored)";
+            if (user.membershipStatus === 'withdrawn') {
+                await this.updateMembershipStatus(user._id, 'active');
+                return 'Signup Success (Membership Restored)';
             } else {
-                throw new Error("이미 가입되어있는 아이디입니다.");
+                throw new Error('이미 가입되어있는 아이디입니다.');
             }
         }
 
@@ -28,14 +32,19 @@ class UserService {
         const createdNewUser = await this.userModel.create(newUserInfo);
 
         // 아래와 같이 이미 인벤토리가 있는지 여부를 체크하여 생성 여부를 결정합니다.
-        const existingInventory = await this.inventoryService.getInventoryByUserId(createdNewUser._id);
+        const existingInventory =
+            await this.inventoryService.getInventoryByUserId(
+                createdNewUser._id
+            );
         if (!existingInventory) {
             // 인벤토리가 없을 경우에만 생성
             await this.inventoryService.addInventory(createdNewUser._id, []);
         }
 
         // 펫보관함 생성 로직 추가
-        const existingPetStorage = await this.myPetService.getMyPet(createdNewUser._id);
+        const existingPetStorage = await this.myPetService.getMyPet(
+            createdNewUser._id
+        );
         if (!existingPetStorage) {
             await this.myPetService.addPetStorage(createdNewUser._id, []);
         }
@@ -64,7 +73,7 @@ class UserService {
     async withdrawUser(userId) {
         const updateResult = await this.updateMembershipStatus(
             userId,
-            "withdrawn"
+            'withdrawn'
         );
         return updateResult;
     }
