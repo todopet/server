@@ -226,8 +226,8 @@ class InventoryService {
         } else {
             throw new Error('Item not found in inventory');
         }
-
-        return inventory;
+        const response = { status: 200, message: 'success' };
+        return response;
     }
     async updateInventoryItemReward(inventoryId, inventoryItemId, quantity) {
         const inventory = await this.inventoryModel.findByInventoryId(
