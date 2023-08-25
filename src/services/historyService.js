@@ -53,13 +53,14 @@ class HistoryService {
         const userInfo = await this.userModel.findByIdAllUser(userIds);
 
         // 데이터 정제
-        const result = ranking.map((item) => {
+        const result = ranking.map((item, index) => {
             const user = userInfo.find(
                 (info) => info._id.toString() === item.userId.toString()
             );
             return {
                 count: item.count,
-                userInfo: user
+                userInfo: user,
+                rank: index + 1
             };
         });
         return result;
