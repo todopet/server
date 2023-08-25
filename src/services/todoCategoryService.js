@@ -1,14 +1,14 @@
-import { TodoCategoryModel } from "../db/models/index.js";
+import { TodoCategoryModel } from '../db/models/index.js';
 
 class TodoCategoryService {
     constructor() {
         this.todoCategoryModel = new TodoCategoryModel();
     }
     async getCategories(userId) {
-        return await this.todoCategoryModel.findCategories(userId);
+        return await this.todoCategoryModel.findByUserId(userId);
     }
     async getCategory(categoryId) {
-        return await this.todoCategoryModel.findCategory(categoryId);
+        return await this.todoCategoryModel.findById(categoryId);
     }
     async addCategory(categoryInfo) {
         const { userId, category } = categoryInfo;

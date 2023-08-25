@@ -1,81 +1,81 @@
-import { Router } from "express";
-import { ItemService } from "../services/index.js";
-import { buildResponse } from "../misc/utils.js";
-import asyncHandler from "../middlewares/asnycHandler.js";
+import { Router } from 'express';
+import { ItemService } from '../services/index.js';
+import { buildResponse } from '../misc/utils.js';
+import asyncHandler from '../middlewares/asyncHandler.js';
 
 const itemRouter = Router();
 const itemService = new ItemService();
 
 // item 조회
 itemRouter.get(
-    "/:id",
+    '/:id',
     asyncHandler(async (req, res, next) => {
         const { id } = req.params;
         const result = await itemService.getItem(id);
-        res.json(buildResponse(result));
+        return result;
     })
 );
 
 // item 저장
 itemRouter.post(
-    "/",
+    '/',
     asyncHandler(async (req, res, next) => {
         const {
-            itemName,
+            name,
             description,
             image,
             status,
             effect,
-            exp,
+            experience,
             probability
         } = req.body;
         const result = await itemService.addItem({
-            itemName,
+            name,
             description,
             image,
             status,
             effect,
-            exp,
+            experience,
             probability
         });
-        res.json(buildResponse(result));
+        return result;
     })
 );
 
 // item 수정
 itemRouter.patch(
-    "/:id",
+    '/:id',
     asyncHandler(async (req, res, next) => {
         const { id } = req.params;
         const {
-            itemName,
+            name,
             description,
             image,
             status,
             effect,
-            exp,
+            experience,
             probability
         } = req.body;
         const result = await itemService.updateItem(id, {
-            itemName,
+            name,
             description,
             image,
             status,
             effect,
-            exp,
+            experience,
             probability
         });
-        res.json(buildResponse(result));
+        return result;
     })
 );
 
 // item 삭제
 itemRouter.delete(
-    "/:id",
+    '/:id',
     asyncHandler(async (req, res, next) => {
         const { id } = req.params;
         const result = await itemService.deleteItem(id);
-        res.json(buildResponse(result));
+        return result;
     })
 );
 

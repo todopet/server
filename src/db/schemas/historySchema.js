@@ -4,7 +4,6 @@ const historySchema = new Schema(
     {
         userId: {
             type: Schema.Types.ObjectId,
-            ref: "User",
             required: true
         },
         // 업적 id 또는 todo id가 될 수 있다.
@@ -14,7 +13,8 @@ const historySchema = new Schema(
         }
     },
     {
-        timestamps: true
+        timestamps: true,
+        versionKey: false
     }
 );
 

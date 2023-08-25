@@ -4,17 +4,23 @@ import { itemSchema } from "../schemas/index.js";
 const Item = model("items", itemSchema);
 
 class ItemModel {
-    async find(id) {
-        return await Item.findById(id).lean();
+    async findById(id) {
+        return await Item.findById(id);
+    }
+    async findAll() {
+        return await Item.find().lean();
     }
     async create(item) {
         return (await Item.create(item)).toObject();
     }
     async update(id, item) {
-        return (await Item.findByIdAndUpdate(id, item)).toObject();
+        const updatedItem = await Item.findByIdAndUpdate(id, item, {
+            new: true
+        }).lean();
+        return updatedItem;
     }
     async delete(id) {
-        return await Item.findByIdAndDelete(id);
+        return await Item.findByIdAndDelete(id).lean();
     }
 }
 

@@ -1,7 +1,7 @@
-import { model } from "mongoose";
-import { userSchema } from "../schemas/index.js";
+import { model } from 'mongoose';
+import { userSchema } from '../schemas/index.js';
 
-const User = model("users", userSchema);
+const User = model('users', userSchema);
 
 class UserModel {
     constructor() {
@@ -11,26 +11,35 @@ class UserModel {
     async create(newUser) {
         const existingUser = await User.findOne({ googleId: newUser.googleId });
         if (existingUser) {
-            throw new Error("이미 가입되어있는 유저입니다."); // 중복된 googleId가 있는 경우 에러를 던짐
+            throw new Error('이미 가입되어있는 유저입니다.');
         }
 
         const createNewUser = await User.create(newUser);
-        return createNewUser;
+        // 새로운 문서를 객체로 변환하여 반환
+        return createNewUser.toObject();
     }
 
     async findAll() {
-        const users = await User.find({}, this.userProjection);
+        const users = await User.find({}, this.userProjection).lean();
         return users;
     }
 
     async findByGoogleId(googleId) {
-        const user = await User.findOne({ googleId });
+        const user = await User.findOne({ googleId }).lean();
         return user;
     }
 
     async findById(userId) {
-        const user = await User.findById(userId);
+        const user = await User.findById(userId).lean();
         return user;
+    }
+
+    async findByIdAllUser(userIds) {
+        const users = await User.find(
+            { _id: { $in: userIds }, membershipStatus: 'active' },
+            { membershipStatus: 0, createdAt: 0, updatedAt: 0 }
+        );
+        return users;
     }
 
     async update({ userId, update }) {
@@ -40,20 +49,25 @@ class UserModel {
             select: this.userProjection
         };
 
-        const updatedUser = await User.findOneAndUpdate(filter, update, option);
+        const updatedUser = await User.findOneAndUpdate(
+            filter,
+            update,
+            option
+        ).lean();
         return updatedUser;
     }
 
     async updateMembershipStatus(userId, status) {
-        const user = await User.findById(userId);
+        const user = await User.findById(userId).lean();
         if (!user) {
-            throw new Error("User not found");
+            throw new Error('User not found');
         }
 
-        user.membershipStatus = status; // 상태 변경
-        await user.save(); // 변경 사항을 데이터베이스에 저장
+        user.membershipStatus = status;
+        // Mongoose 문서가 아닌 일반 객체이므로 save() 메서드를 사용하지 않고, 직접 업데이트 로직 구현
+        await User.updateOne({ _id: userId }, { membershipStatus: status });
 
-        return user; // 업데이트된 사용자 정보 반환
+        return user;
     }
 }
 
