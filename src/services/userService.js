@@ -62,12 +62,19 @@ class UserService {
         return user;
     }
 
-    async updateMembershipStatus(userId, status) {
-        const updateResult = await this.userModel.updateOne(
-            { _id: userId },
-            { $set: { membershipStatus: status } }
+    async updateUserMembershipStatus(userId, newStatus) {
+        const updatedUser = await this.userModel.updateMembershipStatus(
+            userId,
+            newStatus
         );
-        return updateResult;
+        return updatedUser;
+    }
+    async updateUserNickname(userId, newNickname) {
+        const updatedUser = await this.userModel.updateNickname(
+            userId,
+            newNickname
+        );
+        return updatedUser;
     }
 
     async withdrawUser(userId) {
