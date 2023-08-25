@@ -159,11 +159,9 @@ class InventoryService {
         });
     }
 
-    async useItemAndUpdateInventory(userId, inventoryItemId) {
-        //userId, _id: new ObjectId("64e6d7b1e1445390a9191793");
+    async useItemAndUpdateInventory(userId, inventoryItemId, useQuantity) {
         const inventoryId = await this.getInventoryIdByUserId(userId);
-        console.log(inventoryId);
-        //64e6d41a3a66926a9ec9fb4a
+
         const inventory = await this.inventoryModel.findByInventoryId(
             inventoryId
         );
@@ -174,10 +172,10 @@ class InventoryService {
         const existingItemIndex = inventory.items.findIndex(
             (item) => item._id.toString() === inventoryItemId
         );
-        console.log(existingItemIndex);
+
         if (existingItemIndex !== -1) {
             // 아이템 수량 감소
-            inventory.items[existingItemIndex].quantity - 1;
+            inventory.items[existingItemIndex].quantity -= useQuantity;
 
             if (inventory.items[existingItemIndex].quantity <= 0) {
                 inventory.items.splice(existingItemIndex, 1);
@@ -188,7 +186,7 @@ class InventoryService {
                 items: inventory.items
             });
 
-            return true; // 아이템 사용 및 인벤토리 업데이트 성공
+            return inventory.items[existingItemIndex]; //
         } else {
             throw new Error('Item not found in inventory');
         }
