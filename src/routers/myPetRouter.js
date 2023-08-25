@@ -36,6 +36,24 @@ myPetRouter.get(
     })
 );
 
+// myPet level만 조회
+myPetRouter.get(
+    '/:myPetId/level',
+    asyncHandler(async (req, res, next) => {
+        const myPetId = req.params.myPetId;
+        const petStorageId = await myPetService.getPetStorageIdByUserId(
+            req.currentUserId
+        );
+        const petStorage = await myPetService.getMyPetByPetId(
+            petStorageId,
+            myPetId
+        );
+
+        const result = { level: petStorage.pet.level };
+        return result;
+    })
+);
+
 // myPet 생성
 myPetRouter.post(
     '/',
