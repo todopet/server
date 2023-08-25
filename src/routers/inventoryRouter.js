@@ -43,6 +43,7 @@ inventoryRouter.post(
     '/:inventoryItemId/use',
     asyncHandler(async (req, res, next) => {
         const { inventoryItemId } = req.params;
+        const { quantity } = req.body;
         const userId = req.currentUserId;
 
         // 인벤토리 아이템 정보 가져오기
@@ -55,35 +56,13 @@ inventoryRouter.post(
         if (!inventoryItem) {
             throw new Error('Inventory item not found');
         }
-        //console.log(inventoryItem);
-        // {
-        //     item: new ObjectId("64e20b9d52c780f43b98159f"),
-        //     quantity: 33,
-        //     _id: new ObjectId("64e6d7b1e1445390a9191793"),
-        //     info: {
-        //       _id: new ObjectId("64e20b9d52c780f43b98159f"),
-        //       name: '케이크',
-        //       description: '폭신하고 달콤한 딸기 크림 케이크이다. 펫의 포만감이 30 증가한다.',
-        //       image: '@/assets/itemImages/cake.svg',
-        //       status: [ 'hunger' ],
-        //       effect: 30,
-        //       experience: 80,
-        //       probability: 70,
-        //       createdAt: 2023-08-20T12:48:29.201Z,
-        //       updatedAt: 2023-08-20T12:48:29.201Z,
-        //       __v: 0
-        //     }
-        //   }
-        // console.log(userId);
-        // console.log(inventoryItem.info.status);
-        // console.log(inventoryItem.info.effect);
-        // console.log(inventoryItem.info.experience);
-        // 아이템 사용에 따른 펫 정보 업데이트
+
         const updatedPet = await myPetService.updatePetWithItemEffect(
             userId,
             inventoryItem.info.status,
             inventoryItem.info.effect,
-            inventoryItem.info.experience
+            inventoryItem.info.experience,
+            quantity
         );
         //console.log(updatedPet);
 
@@ -135,7 +114,13 @@ inventoryRouter.patch(
             quantity
         );
 
-        return result;
+        res.status(200).json({
+            error: null,
+            data: {
+                status: 200,
+                message: 'success'
+            }
+        });
     })
 );
 

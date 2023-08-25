@@ -35,7 +35,7 @@ class RewardService {
                     );
                 if (existingItem) {
                     // 이미 아이템이 존재하는 경우 수량 증가
-                    await this.inventoryService.updateInventoryItemQuantity(
+                    await this.inventoryService.updateInventoryItemReward(
                         inventoryId,
                         item._id.toString(),
                         1 // 수량을 1 증가시킴
@@ -63,7 +63,7 @@ class RewardService {
                 selectedItem._id.toString()
             );
             if (existingItem) {
-                await this.inventoryService.updateInventoryItemQuantity(
+                await this.inventoryService.updateInventoryItemReward(
                     inventoryId,
                     selectedItem._id.toString(),
                     1 // 수량을 1 증가시킴
