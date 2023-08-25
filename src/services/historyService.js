@@ -11,14 +11,7 @@ class HistoryService {
         const currentDate = dayjs();
         const start = currentDate.startOf('day');
         const end = currentDate.endOf('day');
-        // 입력 날짜의 요일 가져오기
-        // const dateObj = new Date(date);
-        // 대한민국은 UTC+9 이기 때문에, UTC 시간을 맞추기 위해 시간 변수 선언
-        // const utcPlusTime = 9 * 60 * 60 * 1000;
-        // DB에서 조회 시간 start, end를 설정한다.
-        // const start = new Date(dateObj.getTime() - utcPlusTime);
-        // dateObj.setDate(dateObj.getDate() + 1);
-        // const end = new Date(dateObj.getTime() - utcPlusTime);
+
         return await this.historyModel.findHistories(userId, start, end);
     }
     async addHistory(userId, contentId) {
