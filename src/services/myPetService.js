@@ -217,15 +217,17 @@ class MyPetService {
                     updatedPet.pets[0].pet[status] !== undefined ||
                     updatedPet.pets[0].pet[status] === 0
                 ) {
-                    const maxStatus = this.getMaxStatusesByPetLevel(
+                    const maxStatuses = this.getMaxStatusesByPetLevel(
                         updatedPet.pets[0].pet.level
                     );
-                    console.log(maxStatus['hunger'], 'maxStatuses');
+                    console.log(maxStatuses[hunger], '1');
+                    console.log(maxStatuses.hunger, '2');
+                    console.log(maxStatuses['hunger'], '3');
                     if (
                         updatedPet.pets[0].pet[status] + effect * quantity >
-                        maxStatus[status]
+                        maxStatuses[status]
                     ) {
-                        updatedPet.pets[0].pet[status] = maxStatus[status];
+                        updatedPet.pets[0].pet[status] = maxStatuses[status];
                     } else {
                         updatedPet.pets[0].pet[status] += effect * quantity;
                     }
@@ -247,15 +249,17 @@ class MyPetService {
                     updatedPet.pets[0].pet[status] !== undefined ||
                     updatedPet.pets[0].pet[status] === 0
                 ) {
-                    const maxStatus = this.getMaxStatusesByPetLevel(
+                    const maxStatuses = this.getMaxStatusesByPetLevel(
                         updatedPet.pets[0].pet.level
                     );
-                    console.log(maxStatus['hunger'], 'maxStatuses');
+                    console.log(maxStatuses[hunger], '1');
+                    console.log(maxStatuses.hunger, '2');
+                    console.log(maxStatuses['hunger'], '3');
                     if (
                         updatedPet.pets[0].pet[status] + effect * quantity >
-                        maxStatus[status]
+                        maxStatuses[status]
                     ) {
-                        updatedPet.pets[0].pet[status] = maxStatus[status];
+                        updatedPet.pets[0].pet[status] = maxStatuses[status];
                     } else {
                         updatedPet.pets[0].pet[status] += effect * quantity;
                     }
@@ -318,12 +322,12 @@ class MyPetService {
         }
         console.log(petByLevel.hunger, `sdfwefswefwefewefwwefweffwewefefw`);
         const maxStatuses = {
-            _id: maxStatuses._id,
-            petName: maxStatuses.petName,
-            hunger: maxStatuses.hunger,
-            affection: maxStatuses.affection,
-            cleanliness: maxStatuses.cleanliness,
-            condition: maxStatuses.condition
+            _id: petByLevel._id,
+            petName: petByLevel.petName,
+            hunger: petByLevel.hunger,
+            affection: petByLevel.affection,
+            cleanliness: petByLevel.cleanliness,
+            condition: petByLevel.condition
         };
         //{ hunger: 120, affection: 120, cleanliness: 120, condition: 120 }
         return maxStatuses;
