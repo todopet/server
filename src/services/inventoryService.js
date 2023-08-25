@@ -175,7 +175,7 @@ class InventoryService {
 
         if (existingItemIndex !== -1) {
             // 아이템 수량 감소
-            inventory.items[existingItemIndex].quantity -= useQuantity; 
+            inventory.items[existingItemIndex].quantity -= useQuantity;
 
             if (inventory.items[existingItemIndex].quantity <= 0) {
                 inventory.items.splice(existingItemIndex, 1);
@@ -322,7 +322,7 @@ class InventoryService {
         const inventory = await this.inventoryModel.findByInventoryId(
             inventoryId
         );
- 
+
         if (!inventory) {
             throw new Error('Inventory not found');
         }
