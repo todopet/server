@@ -64,12 +64,12 @@ inventoryRouter.post(
             inventoryItem.info.experience,
             quantity
         );
-        //console.log(updatedPet);
 
         // 아이템 사용 및 인벤토리 업데이트
         const itemUsed = await inventoryService.useItemAndUpdateInventory(
             userId,
-            inventoryItemId
+            inventoryItemId,
+            quantity
         );
 
         if (!itemUsed) {
@@ -77,9 +77,9 @@ inventoryRouter.post(
                 'Failed to use item or item not found in inventory'
             );
         }
-
+        const result = { updatedPet, itemUsed };
         // 아이템 사용 결과 및 업데이트된 펫 정보 반환
-        res.json(buildResponse({ updatedPet }));
+        return result;
     })
 );
 

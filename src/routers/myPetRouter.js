@@ -16,7 +16,7 @@ myPetRouter.get(
         const result = await myPetService.getPetStorageByPetStorageId(
             petStorageId
         );
-        return result; // 이 부분을 수정합니다.
+        return result;
     })
 );
 
@@ -43,7 +43,6 @@ myPetRouter.post(
         const userId = req.currentUserId;
         const { level } = req.body;
 
-        // 펫 레벨에 따라 해당 레벨의 펫을 가져옵니다.
         const pet = await myPetService.getPetByLevel(level);
 
         const result = await myPetService.addMyPet(userId, pet._id);
