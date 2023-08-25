@@ -52,7 +52,7 @@ myPetRouter.post(
     })
 );
 
-// myPet 수정 (레벨업, 아이템사용시)
+// myPet 수정 (아이템 버리기, 아이템 추가)
 myPetRouter.patch(
     '/:myPetId',
     asyncHandler(async (req, res, next) => {
@@ -61,6 +61,7 @@ myPetRouter.patch(
         const petStorageId = await myPetService.getPetStorageIdByUserId(
             req.currentUserId
         );
+
         const result = await myPetService.updatePetInMyPet(
             petStorageId,
             myPetId,
