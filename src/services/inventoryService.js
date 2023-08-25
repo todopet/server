@@ -160,23 +160,24 @@ class InventoryService {
     }
 
     async useItemAndUpdateInventory(userId, inventoryItemId) {
+        //userId, _id: new ObjectId("64e6d7b1e1445390a9191793");
         const inventoryId = await this.getInventoryIdByUserId(userId);
-
+        console.log(inventoryId);
+        //64e6d41a3a66926a9ec9fb4a
         const inventory = await this.inventoryModel.findByInventoryId(
             inventoryId
         );
-
         if (!inventory) {
             throw new Error('Inventory not found');
         }
 
         const existingItemIndex = inventory.items.findIndex(
-            (item) => item.item.toString() === inventoryItemId
+            (item) => item._id.toString() === inventoryItemId
         );
-
+        console.log(existingItemIndex);
         if (existingItemIndex !== -1) {
             // 아이템 수량 감소
-            inventory.items[existingItemIndex].quantity -= 1;
+            inventory.items[existingItemIndex].quantity - 1;
 
             if (inventory.items[existingItemIndex].quantity <= 0) {
                 inventory.items.splice(existingItemIndex, 1);
@@ -194,6 +195,41 @@ class InventoryService {
     }
 
     async updateInventoryItemQuantity(inventoryId, inventoryItemId, quantity) {
+        const inventory = await this.inventoryModel.findByInventoryId(
+            inventoryId
+        );
+
+        if (!inventory) {
+            throw new Error('Inventory not found');
+        }
+
+        if (isNaN(quantity)) {
+            throw new Error('Invalid quantity');
+        }
+
+        const existingItemIndex = inventory.items.findIndex(
+            (item) => item._id.toString() === inventoryItemId
+        );
+
+        if (existingItemIndex !== -1) {
+            // 이미 있는 아이템인 경우 수량 증가
+            inventory.items[existingItemIndex].quantity += quantity;
+
+            if (inventory.items[existingItemIndex].quantity <= 0) {
+                inventory.items.splice(existingItemIndex, 1);
+            }
+
+            // 아이템 배열 업데이트 후 저장
+            await this.inventoryModel.update(inventoryId, {
+                items: inventory.items
+            });
+        } else {
+            throw new Error('Item not found in inventory');
+        }
+
+        return inventory;
+    }
+    async updateInventoryItemReward(inventoryId, inventoryItemId, quantity) {
         const inventory = await this.inventoryModel.findByInventoryId(
             inventoryId
         );
@@ -228,7 +264,6 @@ class InventoryService {
 
         return inventory;
     }
-
     async deleteInventoryItem(inventoryId, inventoryItemId) {
         const inventory = await this.inventoryModel.findByInventoryId(
             inventoryId
