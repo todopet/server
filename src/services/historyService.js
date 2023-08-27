@@ -30,21 +30,26 @@ class HistoryService {
         // 입력 날짜의 요일 가져오기
         const dayOfWeek = currentDate.day();
         // 이전 일요일 찾기
-        const previousSunday = currentDate.subtract(dayOfWeek, 'day').toDate();
+        const previousSunday = currentDate
+            .subtract(dayOfWeek, 'day')
+            .startOf('day')
+            .toDate();
         // 이후 토요일 찾기
-        const nextSaturday = currentDate.add(6 - dayOfWeek, 'day').toDate();
+        const nextSaturday = currentDate
+            .add(6 - dayOfWeek, 'day')
+            .endOf('day')
+            .toDate();
 
         // 랭킹 구하기 (유저아이디, 투두 해결 갯수)
         const ranking = await this.historyModel.findRanking(
             previousSunday,
             nextSaturday
         );
-
+        console.log(previousSunday, nextSaturday);
         // 유저 아이디 배열 만들기
         const userIds = ranking.map((item) => item.userId);
         // 해당 배열로 유저 정보 불러오기
         const userInfo = await this.userModel.findByIdAllUser(userIds);
-
         // 데이터 정제
         const result = ranking.map((item, index) => {
             const user = userInfo.find(
