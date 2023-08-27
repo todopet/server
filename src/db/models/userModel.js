@@ -69,6 +69,8 @@ class UserModel {
 
         return user;
     }
+
+    async findInfoByUserId(userId) {}
 }
 
 export default UserModel;
