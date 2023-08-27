@@ -17,6 +17,9 @@ class TodoCategoryService {
     async updateCategory(id, category) {
         return await this.todoCategoryModel.update(id, category);
     }
+    async updateEndCategory(id) {
+        return await this.todoCategoryModel.updateEnd(id);
+    }
     async deleteCategory(id) {
         return await this.todoCategoryModel.delete(id);
     }

@@ -24,6 +24,9 @@ class TodoCategoryModel {
             category
         }).lean();
     }
+    async updateEnd(id) {
+        return await TodoCategory.findByIdAndUpdate(id, { ended: true });
+    }
     async delete(id) {
         return await TodoCategory.findByIdAndDelete(id).lean();
     }
