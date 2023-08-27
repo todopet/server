@@ -1,5 +1,6 @@
 import { todoContentModel, TodoCategoryModel } from '../db/models/index.js';
 import { HistoryService, RewardService } from '../services/index.js';
+import dayjs from 'dayjs';
 
 class TodoContentService {
     constructor() {
@@ -12,12 +13,15 @@ class TodoContentService {
     async getMultipleContents(userId, start, end) {
         const categories = await this.todoCategoryModel.findByUserId(userId);
 
+        const startDate = dayjs(start).startOf('day');
+        const endDate = dayjs(end).endOf('day');
+
         // 사용자의 각 카테고리에 대해 비동기 작업을 병렬로 시작
         const promises = categories.map(async (category) => {
             const todos = await todoContentModel.findByCategoryId(
                 category._id.toString(),
-                start,
-                end
+                startDate,
+                endDate
             );
             category.todos = todos;
         });
