@@ -31,6 +31,9 @@ class UserModel {
 
     async findById(userId) {
         const user = await User.findById(userId).lean();
+        if (!user) {
+            throw new Error('User not found');
+        }
         return user;
     }
 
@@ -57,17 +60,22 @@ class UserModel {
         return updatedUser;
     }
 
+    async updateNickname(userId, newNickname) {
+        const updatedUser = await User.findOneAndUpdate(
+            { _id: userId },
+            { nickname: newNickname },
+            { new: true, lean: true }
+        );
+        return updatedUser;
+    }
+
     async updateMembershipStatus(userId, status) {
-        const user = await User.findById(userId).lean();
-        if (!user) {
-            throw new Error('User not found');
-        }
-
-        user.membershipStatus = status;
-        // Mongoose 문서가 아닌 일반 객체이므로 save() 메서드를 사용하지 않고, 직접 업데이트 로직 구현
-        await User.updateOne({ _id: userId }, { membershipStatus: status });
-
-        return user;
+        const updatedUser = await User.findOneAndUpdate(
+            { _id: userId },
+            { membershipStatus: status },
+            { new: true, lean: true }
+        );
+        return updatedUser;
     }
 
     async findInfoByUserId(userId) {}

@@ -26,4 +26,29 @@ userRouter.get(
     })
 );
 
+// 회원 닉네임 변경
+userRouter.patch(
+    '/myInfo',
+    asyncHandler(async (req, res, next) => {
+        const userId = req.currentUserId;
+        const { nickname } = req.body;
+        const result = await userService.updateUserNickname(userId, nickname);
+        return result;
+    })
+);
+
+// 회원 상태 변경
+userRouter.patch(
+    '/myStatus',
+    asyncHandler(async (req, res, next) => {
+        const userId = req.currentUserId;
+        const { membershipStatus } = req.body;
+        const result = await userService.updateUserMembershipStatus(
+            userId,
+            membershipStatus
+        );
+        return result;
+    })
+);
+
 export default userRouter;
