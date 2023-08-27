@@ -1,5 +1,6 @@
 import { UserModel, HistoryModel } from '../db/models/index.js';
 import { InventoryService, MyPetService } from './index.js';
+import { setKoreaDay, formatDateToString } from '../utils/common.js';
 import dayjs from 'dayjs';
 
 class UserService {
@@ -89,28 +90,27 @@ class UserService {
         // todo history 남겨져 있는 날짜의 갯수 구해야함
         // todo history 남겨져 있는 history 전체 갯수 구해야함
         const user = await this.userModel.findById(userId);
-
-        // 함께한 날짜 = 현재날짜 - 가입일
-        const withPetDate = Math.floor(
-            (dayjs() - user.createdAt) / (24 * 60 * 60 * 1000)
-        );
-
+        // 함께한 날짜
+        const withPetDate = setKoreaDay(user.createdAt);
         const userHistory = await this.historyModel.findUserHistory(userId);
+
+        // todo를 달성한 횟수
         const todoCount = userHistory.length;
 
         userHistory.sort((a, b) =>
             a.createdAt.toString().localeCompare(b.createdAt.toString())
         );
+
+        // todo를 달성한 날짜
         const historyCount = userHistory.filter((item, index, array) => {
             // 첫 번째 요소는 항상 결과 배열에 포함
             if (index === 0) {
                 return true;
             }
-
             // 현재 요소의 날짜와 이전 요소의 날짜를 비교하여 다른 경우에만 true 반환
             return (
-                item.createdAt.toString() !==
-                array[index - 1].createdAt.toString()
+                formatDateToString(item.createdAt) !==
+                formatDateToString(array[index - 1].createdAt)
             );
         }).length;
 

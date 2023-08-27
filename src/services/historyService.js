@@ -45,7 +45,6 @@ class HistoryService {
             previousSunday,
             nextSaturday
         );
-        console.log(previousSunday, nextSaturday);
         // 유저 아이디 배열 만들기
         const userIds = ranking.map((item) => item.userId);
         // 해당 배열로 유저 정보 불러오기
