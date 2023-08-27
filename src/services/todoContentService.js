@@ -60,13 +60,12 @@ class TodoContentService {
                 // 보상 지급
                 const reward = await this.rewardService.giveReward(userId);
                 message = {
-                    content: '아이템 획득!',
-                    reward: reward.name,
-                    status: reward.status
+                    type: reward.status.length >= 4 ? 'SPECIAL' : 'NORMAL',
+                    reward: reward.name
                 };
             } else {
                 message = {
-                    content: '오늘 보상 최대치를 받았습니다.',
+                    type: 'ALL_RECEIVED',
                     reward: null
                 };
             }
@@ -74,7 +73,7 @@ class TodoContentService {
             await this.historyService.addHistory(userId, id);
         } else if (status === 'completed') {
             message = {
-                content: '이미 보상을 수령하였습니다',
+                type: 'RECEIVED',
                 reward: null
             };
         }
