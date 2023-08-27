@@ -50,6 +50,16 @@ todoCategoryRouter.patch(
     })
 );
 
+// TODO 카테고리 목표 종료 처리
+todoCategoryRouter.patch(
+    '/endCategory/:id',
+    asyncHandler(async (req, res, next) => {
+        const { id } = req.params;
+        const result = await todoCategoryService.updateEndCategory(id);
+        return result;
+    })
+);
+
 // TODO 카테고리 삭제
 todoCategoryRouter.delete(
     '/:id',

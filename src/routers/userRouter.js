@@ -4,25 +4,24 @@ import { buildResponse } from '../misc/utils.js';
 import asyncHandler from '../middlewares/asyncHandler.js';
 
 const userRouter = Router();
-// const userService = new UserService();
-const historyService = new HistoryService();
 const userService = new UserService();
+const historyService = new HistoryService();
 
 // 랭킹 순위 전달 받기.
 userRouter.get(
-    '/',
+    '/rank',
     asyncHandler(async (req, res, next) => {
         const ranking = await historyService.getRanking();
         return ranking;
     })
 );
 
-// 회원 정보 조회
+// 마이페이지 정보 전달 받기
 userRouter.get(
-    '/myInfo',
+    '/',
     asyncHandler(async (req, res, next) => {
         const userId = req.currentUserId;
-        const user = await userService.findUserById(userId);
+        const user = await userService.getUserInfo(userId);
         return user;
     })
 );

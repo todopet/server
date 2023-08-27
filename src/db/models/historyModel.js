@@ -12,6 +12,10 @@ class HistoryModel {
             }
         }).lean();
     }
+
+    async findUserHistory(userId) {
+        return await History.find({ userId }).lean();
+    }
     async createHistory(userId, contentId) {
         return (await History.create({ userId, contentId })).toObject();
     }

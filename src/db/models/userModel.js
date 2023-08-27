@@ -77,6 +77,8 @@ class UserModel {
         );
         return updatedUser;
     }
+
+    async findInfoByUserId(userId) {}
 }
 
 export default UserModel;
