@@ -1,81 +1,75 @@
-import { Router } from "express";
-import { TodoContentService } from "../services/index.js";
-import { buildResponse } from "../misc/utils.js";
-import asyncHandler from "../middlewares/asnycHandler.js";
+import { Router } from 'express';
+import { TodoContentService } from '../services/index.js';
+import asyncHandler from '../middlewares/asyncHandler.js';
 
 const todoContentRouter = Router();
 const todoContentService = new TodoContentService();
 
-// ----------------------------- 계획 ----------------------
-// TODO 계획(todo) 조회
+// 계획(todo) 목록 전체 조회
+// TODO: 날짜별로 조회하기. 날짜 데이터 파라미터로 전달받아야 함
 todoContentRouter.get(
-    "/contents/:id",
+    '/',
     asyncHandler(async (req, res, next) => {
-        const id = req.params.id;
-        const category = id
-            ? await todoContentService.getContent(id)
-            : await todoContentService.getContents();
-        res.json(buildResponse(category));
+        const userId = req.currentUserId;
+        const start = req.query.start;
+        const end = req.query.end;
+        const contents = await todoContentService.getMultipleContents(
+            userId,
+            start,
+            end
+        );
+        return contents;
     })
 );
 
-// TODO 계획(todo) 저장
-todoContentRouter.post(
-    "/:categoryId",
+// 계획(todo) 단건 조회
+todoContentRouter.get(
+    '/:id',
     asyncHandler(async (req, res, next) => {
-        const userId = "64de2fbf9a951f54beeff3ff";
-        // const { userId } = req.currentUserId;
+        const { id } = req.params;
+        const contents = await todoContentService.getSingleContents(id);
+        return contents;
+    })
+);
 
-        const { categoryId } = req.params;
-        const { todo } = req.body;
+// 계획(todo) 저장
+todoContentRouter.post(
+    '/',
+    asyncHandler(async (req, res, next) => {
+        const { categoryId, todo } = req.body;
         const result = await todoContentService.addContent({
-            userId,
             categoryId,
             todo
         });
-        res.json(buildResponse(result));
+        return result;
     })
 );
 
-// TODO 계획(todo) 수정 - 계획 처리
+// 계획(todo) 수정 - 계획 처리 및 보상 지급, 히스토리 등록
 todoContentRouter.patch(
-    "/:categoryId",
+    '/:id',
     asyncHandler(async (req, res, next) => {
-        const userId = "64de2fbf9a951f54beeff3ff";
-        // const { userId } = req.currentUserId;
-
-        const { categoryId } = req.params;
-        const { contentId, todo, status } = req.body;
-        // content, status...
-        // 처리하면 상태 변화 해줘야 함 그리고 보상 줘야함
-        // 처리한걸 취소하고 다시 체크하면 보상 주면 안됨
+        const userId = req.currentUserId;
+        const { id } = req.params;
+        const { todo, status } = req.body;
         const response = await todoContentService.updateContent({
+            id,
             userId,
-            categoryId,
-            contentId,
             todo,
             status
         });
-        const result = response.todos.find(
-            (item) => item._id.toString() === contentId
-        );
-        res.json(buildResponse(result));
+
+        return response;
     })
 );
 
 // TODO 계획(todo) 삭제
 todoContentRouter.delete(
-    "/:categoryId",
+    '/:id',
     asyncHandler(async (req, res, next) => {
-        const { categoryId } = req.params;
-        const { contentId } = req.body;
-        console.log("router");
-        const result = await todoContentService.deleteContent(
-            categoryId,
-            contentId
-        );
-        console.log(result);
-        res.json(buildResponse(result));
+        const { id } = req.params;
+        const result = await todoContentService.deleteContent(id);
+        return result;
     })
 );
 

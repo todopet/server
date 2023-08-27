@@ -1,17 +1,15 @@
-import { Schema } from "mongoose";
+import { Schema } from 'mongoose';
 
 const inventorySchema = new Schema(
     {
         userId: {
             type: Schema.Types.ObjectId,
-            ref: "User",
             required: true
         },
         items: [
             {
                 item: {
                     type: Schema.Types.ObjectId,
-                    ref: "Item",
                     required: true
                 },
                 quantity: {
@@ -22,6 +20,7 @@ const inventorySchema = new Schema(
         ]
     },
     {
+        versionKey: false,
         timestamps: true
     }
 );

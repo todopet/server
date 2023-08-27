@@ -11,7 +11,7 @@ const petSchema = new Schema(
             default: 0
         },
         // 경험치
-        exp: {
+        experience: {
             type: Number,
             default: 0
         },
@@ -37,7 +37,8 @@ const petSchema = new Schema(
         }
     },
     {
-        timestamps: true
+        timestamps: true,
+        versionKey: false
     }
 );
 
