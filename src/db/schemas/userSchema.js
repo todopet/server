@@ -1,4 +1,4 @@
-import { Schema } from "mongoose";
+import { Schema } from 'mongoose';
 
 const userSchema = new Schema(
     {
@@ -14,8 +14,8 @@ const userSchema = new Schema(
         },
         membershipStatus: {
             type: String,
-            enum: ["active", "withdrawn", "suspended"],
-            default: "active",
+            enum: ['active', 'withdrawn', 'suspended'],
+            default: 'active',
             required: true
         },
         picture: {
