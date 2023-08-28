@@ -36,10 +36,11 @@ todoContentRouter.get(
 todoContentRouter.post(
     '/',
     asyncHandler(async (req, res, next) => {
-        const { categoryId, todo } = req.body;
+        const { categoryId, todo, date } = req.body;
         const result = await todoContentService.addContent({
             categoryId,
-            todo
+            todo,
+            date
         });
         return result;
     })
