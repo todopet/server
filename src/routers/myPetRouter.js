@@ -40,18 +40,11 @@ myPetRouter.get(
 
 // myPet level만 조회
 myPetRouter.get(
-    '/:myPetId/level',
+    '/myPet/level',
     asyncHandler(async (req, res, next) => {
-        const myPetId = req.params.myPetId;
-        const petStorageId = await myPetService.getPetStorageIdByUserId(
-            req.currentUserId
-        );
-        const petStorage = await myPetService.getMyPetByPetId(
-            petStorageId,
-            myPetId
-        );
-
-        const result = { level: petStorage.pet.level };
+        const userId = req.currentUserId;
+        const myPet = await myPetService.getMyPet(userId);
+        const result = { level: myPet.pets[0].pet.level };
         return result;
     })
 );
