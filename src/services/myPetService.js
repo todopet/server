@@ -1,6 +1,7 @@
 import { MyPetModel, PetModel } from '../db/models/index.js';
 import { PetService, InventoryService } from './index.js';
 import mongoose from 'mongoose';
+import dayjs from 'dayjs';
 
 class MyPetService {
     constructor() {
@@ -54,13 +55,10 @@ class MyPetService {
             throw new Error('Invalid userId');
         }
 
-        
         const petService = new PetService();
 
-      
         const lowestLevelPet = await petService.getLowestLevel();
 
-      
         const petStorage = await this.myPetModel.create({
             userId: userId.toString(),
             pets: [
@@ -75,7 +73,6 @@ class MyPetService {
     async addMyPet(userId, petId) {
         const pet = await this.petService.getPet(petId);
 
-   
         const petInfo = {
             petName: pet.petName,
             level: pet.level,
@@ -85,24 +82,59 @@ class MyPetService {
             cleanliness: pet.cleanliness,
             condition: pet.condition
         };
-       
+
         const petStorageId = await this.getPetStorageIdByUserId(userId);
         const petStorage = await this.myPetModel.findByPetStorageId(
             petStorageId
         );
 
-     
         petStorage.pets.push({
             pet: pet
         });
 
-      
         const updatedPetStorage = await this.myPetModel.update(
             petStorageId,
             petStorage
         );
 
-        return updatedPetStorage; 
+        return updatedPetStorage;
+    }
+    //업데이트 시간과 현재 시간의 차이를 계산하여 펫 status 반환
+    async updatePetStatus(petStorageId) {
+        const petStorage = await this.getPetStorageByPetStorageId(petStorageId);
+
+        const lastUpdateTime = dayjs(petStorage.updatedAt);
+        const currentTime = dayjs();
+
+        const timeDifferenceInMinutes = currentTime.diff(
+            lastUpdateTime,
+            'minute'
+        );
+
+        const updatedPet = { ...petStorage };
+
+        const statusFieldsToUpdate = [
+            'hunger',
+            'cleanliness',
+            'affection',
+            'condition'
+        ];
+
+        statusFieldsToUpdate.forEach((statusField) => {
+            const currentValue = updatedPet.pets[0].pet[statusField];
+            const valueToSubtract = timeDifferenceInMinutes * 0.05;
+            updatedPet.pets[0].pet[statusField] = Math.max(
+                currentValue - valueToSubtract,
+                0
+            );
+        });
+
+        // 데이터베이스에서 펫의 상태를 업데이트합니다.
+        return await this.statusUpdatePetInMyPet(
+            petStorageId,
+            updatedPet.pets[0]._id,
+            updatedPet
+        );
     }
 
     //펫 정보 각각 업데이트
@@ -117,16 +149,14 @@ class MyPetService {
             throw new Error('Pet not found in petStorage');
         }
 
-    
         Object.assign(petToUpdate.pet, updatedFields);
-
 
         const updatedPetStorage = await this.myPetModel.update(
             petStorageId,
             petStorage
         );
 
-        return petToUpdate; 
+        return petToUpdate;
     }
 
     async updatePetWithItemEffect(
@@ -136,12 +166,10 @@ class MyPetService {
         experience,
         quantity
     ) {
-        
         const petStorageId = await this.getPetStorageIdByUserId(userId);
 
         const petStorage = await this.getPetStorageByPetStorageId(petStorageId);
         const userPetName = petStorage.pets[0].pet.petName;
-        
 
         const updatedPet = { ...petStorage };
         updatedPet.pets[0].pet.experience;
@@ -150,12 +178,11 @@ class MyPetService {
         updatedPet.pets[0].pet.affection;
         updatedPet.pets[0].pet.cleanliness;
         updatedPet.pets[0].pet.condition;
-       
 
         // 경험치에 아이템 경험치를 더해줌
         updatedPet.pets[0].pet.experience =
             updatedPet.pets[0].pet.experience + experience * quantity;
-        
+
         // 경험치가 최대 경험치를 넘어가면 레벨 업 처리
         const maxExperience = await this.getMaxExperienceByPetLevel(
             updatedPet.pets[0].pet.level
@@ -173,6 +200,7 @@ class MyPetService {
                 userPetName
             );
             updatedPet.pets[0].pet._id = maxStatuses._id;
+            updatedPet.pets[0].pet.petName = maxStatuses.petName;
             updatedPet.pets[0].pet.experience = 0;
             updatedPet.pets[0].pet.hunger = maxStatuses.hunger;
             updatedPet.pets[0].pet.affection = maxStatuses.affection;
@@ -264,7 +292,7 @@ class MyPetService {
 
         const maxStatuses = {
             _id: petByLevel._id,
-            petName: userPetName,
+            petName: petByLevel.petName,
             hunger: petByLevel.hunger,
             affection: petByLevel.affection,
             cleanliness: petByLevel.cleanliness,
@@ -281,7 +309,7 @@ class MyPetService {
         if (!petByLevel) {
             throw new Error(`Pet information not found for level: ${level}`);
         }
-    
+
         return petByLevel.experience;
     }
 
