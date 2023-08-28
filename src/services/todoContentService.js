@@ -37,7 +37,9 @@ class TodoContentService {
     }
 
     async addContent(content) {
-        return await todoContentModel.create(content);
+        const { categoryId, todo, date } = content;
+        const createdAt = dayjs(date).startOf('day');
+        return await todoContentModel.create({ categoryId, todo, createdAt });
     }
 
     async updateContent(content) {
