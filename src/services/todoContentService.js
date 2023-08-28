@@ -1,5 +1,10 @@
 import { todoContentModel, TodoCategoryModel } from '../db/models/index.js';
-import { HistoryService, RewardService } from '../services/index.js';
+import {
+    HistoryService,
+    InventoryService,
+    RewardService
+} from '../services/index.js';
+import { maxVolume } from '../utils/common.js';
 import dayjs from 'dayjs';
 
 class TodoContentService {
@@ -8,6 +13,7 @@ class TodoContentService {
         this.todoCategoryModel = new TodoCategoryModel();
         this.historyService = new HistoryService();
         this.rewardService = new RewardService();
+        this.inventoryService = new InventoryService();
     }
 
     async getMultipleContents(userId, start, end) {
@@ -54,17 +60,38 @@ class TodoContentService {
         const isHistory = history.find((data) => data.contentId === id);
 
         let message = null;
+        let inventoryCount = 0;
 
         // 히스토리가 존재하지 않으면 보상 지급 및 히스토리 추가
         if (!isHistory && status === 'completed') {
             // 히스토리가 하루 10개 이상 있을 경우 보상을 지급하지 않는다.
             if (history.length < 10) {
-                // 보상 지급
-                const reward = await this.rewardService.giveReward(userId);
-                message = {
-                    type: reward.status.length >= 4 ? 'SPECIAL' : 'NORMAL',
-                    reward: reward.name
-                };
+                const inventoryId =
+                    await this.inventoryService.getInventoryIdByUserId(userId);
+                inventoryCount = await this.inventoryService.getInventoryCount(
+                    inventoryId
+                );
+
+                // 인벤토리 아이템 갯수 체크. 50개 넘으면 안줌
+                if (inventoryCount >= maxVolume) {
+                    message = {
+                        type: 'FULL',
+                        reward: null
+                    };
+                } else {
+                    // 보상 지급
+                    const reward = await this.rewardService.giveReward(userId);
+                    // 유저의 인벤토리 아이템 갯수 조회
+                    inventoryCount =
+                        await this.inventoryService.getInventoryCount(
+                            inventoryId
+                        );
+                    message = {
+                        type: reward.status.length >= 4 ? 'SPECIAL' : 'NORMAL',
+                        inventoryCount,
+                        reward: reward.name
+                    };
+                }
             } else {
                 message = {
                     type: 'ALL_RECEIVED',

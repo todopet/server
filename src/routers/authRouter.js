@@ -141,14 +141,14 @@ authRouter.get(
 );
 
 //회원탈퇴
-authRouter.get(
+authRouter.patch(
     '/withdraw',
     userAuthorization,
     asyncHandler(async (req, res) => {
         const userId = req.currentUserId;
+
         const inventoryService = new InventoryService();
         const myPetService = new MyPetService();
-        const userService = new UserService();
 
         try {
             await userService.withdrawUser(userId);
