@@ -15,6 +15,7 @@ inventoryRouter.get(
         const inventoryId = await inventoryService.getInventoryIdByUserId(
             userId
         );
+        console.log(inventoryId);
         const result = await inventoryService.getInventoryByInventoryId(
             inventoryId
         );
@@ -34,6 +35,19 @@ inventoryRouter.get(
             inventoryId,
             inventoryItemId
         );
+        return result;
+    })
+);
+
+// 인벤토리 총 아이템 수량 조회
+inventoryRouter.get(
+    '/itemsCount',
+    asyncHandler(async (req, res, next) => {
+        const userId = req.currentUserId;
+        const inventoryId = await inventoryService.getInventoryIdByUserId(
+            userId
+        );
+        const result = await inventoryService.getInventoryCount(inventoryId);
         return result;
     })
 );

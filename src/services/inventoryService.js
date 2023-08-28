@@ -148,6 +148,19 @@ class InventoryService {
             return null;
         }
     }
+
+    async getInventoryCount(inventoryId) {
+        const inventory = await this.inventoryModel.findByInventoryId(
+            inventoryId
+        );
+
+        let totalQuantity = 0;
+        for (const item of inventory.items) {
+            totalQuantity += item.quantity;
+        }
+        return totalQuantity;
+    }
+
     async addInventory(userId, items) {
         if (!mongoose.Types.ObjectId.isValid(userId)) {
             throw new Error('Invalid userId');
