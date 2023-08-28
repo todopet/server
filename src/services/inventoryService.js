@@ -368,6 +368,14 @@ class InventoryService {
             items: inventory.items
         });
     }
+    //회원 탈퇴시 인벤토리 삭제
+    async deleteInventoryByUserId(userId) {
+        const inventory = await this.getInventoryByUserId(userId);
+
+        if (inventory) {
+            await this.inventoryModel.delete(inventory._id);
+        }
+    }
 }
 
 export default InventoryService;
