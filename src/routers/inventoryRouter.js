@@ -47,7 +47,10 @@ inventoryRouter.get(
         const inventoryId = await inventoryService.getInventoryIdByUserId(
             userId
         );
-        const result = await inventoryService.getInventoryCount(inventoryId);
+        const itemsCount = await inventoryService.getInventoryCount(
+            inventoryId
+        );
+        const result = { count: itemsCount };
         return result;
     })
 );
