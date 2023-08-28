@@ -11,18 +11,6 @@ class UserService {
         this.historyModel = new HistoryModel();
     }
     async addUser(userInfo) {
-        const { googleId, picture } = userInfo;
-
-        const user = await this.userModel.findByGoogleId(googleId);
-        if (user) {
-            if (user.membershipStatus === 'withdrawn') {
-                await this.updateMembershipStatus(user._id, 'active');
-                return 'Signup Success (Membership Restored)';
-            } else {
-                throw new Error('이미 가입되어있는 아이디입니다.');
-            }
-        }
-
         const newUserInfo = {
             googleId: userInfo.id,
             picture: userInfo.picture,
@@ -77,7 +65,7 @@ class UserService {
     }
 
     async withdrawUser(userId) {
-        const updateResult = await this.updateMembershipStatus(
+        const updateResult = await this.userModel.updateMembershipStatus(
             userId,
             'withdrawn'
         );

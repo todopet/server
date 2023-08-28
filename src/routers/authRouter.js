@@ -1,6 +1,10 @@
 import { Router } from 'express';
-import UserService from '../services/userService.js';
-import InventoryService from '../services/inventoryService.js';
+import {
+    UserService,
+    InventoryService,
+    MyPetService
+} from '../services/index.js';
+
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import axios from 'axios';
@@ -72,7 +76,22 @@ authRouter.get(
         const userService = new UserService();
         let user = await userService.findByGoogleId(resp2.data.id);
 
-        if (!user) {
+        if (user) {
+            // Check if the user's membershipStatus is 'withdrawn'
+            if (user.membershipStatus === 'withdrawn') {
+                return res.status(403).json({
+                    message: '탈퇴한 회원입니다. 로그인 할 수 없습니다.'
+                });
+            }
+
+            // Check if the user's membershipStatus is 'active'
+            if (user.membershipStatus !== 'active') {
+                return res.status(403).json({
+                    message: '비활성화된 회원입니다. 로그인 할 수 없습니다.'
+                });
+            }
+        } else {
+            // If user not found, add the user
             user = await userService.addUser(resp2.data);
         }
 
@@ -124,16 +143,23 @@ authRouter.get(
 //회원탈퇴
 authRouter.get(
     '/withdraw',
-    //userAuthorization,
+    userAuthorization,
     asyncHandler(async (req, res) => {
         const userId = req.currentUserId;
-
+        const inventoryService = new InventoryService();
+        const myPetService = new MyPetService();
         const userService = new UserService();
+
         try {
-            await userService.withdrawUser(userId); // 회원 탈퇴 처리
-            res.status(200).json({ message: 'Withdrawal successful' });
+            await userService.withdrawUser(userId);
+
+            // 사용자의 인벤토리와 펫 보관함 삭제
+            await inventoryService.deleteInventoryByUserId(userId);
+            await myPetService.deletePetStorageByUserId(userId);
+
+            res.status(200).json({ message: '탈퇴 처리 완료' });
         } catch (error) {
-            res.status(500).json({ error: 'Failed to withdraw user' });
+            res.status(500).json({ error: '사용자 탈퇴 실패' });
         }
     })
 );
