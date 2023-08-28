@@ -122,12 +122,11 @@ authRouter.get(
 );
 
 //회원탈퇴
-authRouter.get(
+authRouter.patch(
     '/withdraw',
-    //userAuthorization,
+    userAuthorization,
     asyncHandler(async (req, res) => {
         const userId = req.currentUserId;
-
         const userService = new UserService();
         try {
             await userService.withdrawUser(userId); // 회원 탈퇴 처리
