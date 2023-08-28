@@ -77,7 +77,7 @@ class UserService {
     }
 
     async withdrawUser(userId) {
-        const updateResult = await this.updateMembershipStatus(
+        const updateResult = await this.userModel.updateMembershipStatus(
             userId,
             'withdrawn'
         );
