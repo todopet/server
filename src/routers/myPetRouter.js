@@ -13,9 +13,11 @@ myPetRouter.get(
     asyncHandler(async (req, res, next) => {
         const userId = req.currentUserId;
         const petStorageId = await myPetService.getPetStorageIdByUserId(userId);
-        const result = await myPetService.getPetStorageByPetStorageId(
-            petStorageId
-        );
+
+        // 펫 정보를 가져오고 계산된 수치를 적용합니다.
+        const result = await myPetService.updatePetStatus(petStorageId);
+
+        // 계산된 펫 정보를 클라이언트에 응답합니다.
         return result;
     })
 );
