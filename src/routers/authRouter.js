@@ -2,7 +2,8 @@ import { Router } from 'express';
 import {
     UserService,
     InventoryService,
-    MyPetService
+    MyPetService,
+    HistoryService
 } from '../services/index.js';
 
 import cookieParser from 'cookie-parser';
@@ -140,6 +141,11 @@ authRouter.get(
     })
 );
 
+authRouter.get('/logout', (req, res) => {
+    res.clearCookie('token'); // 토큰 쿠키 삭제
+    res.redirect('/api/v1'); // 로그아웃 후 루트 페이지로 리다이렉트
+});
+
 //회원탈퇴
 authRouter.get(
     '/withdraw',
@@ -149,13 +155,20 @@ authRouter.get(
         const inventoryService = new InventoryService();
         const myPetService = new MyPetService();
         const userService = new UserService();
+        const historyService = new HistoryService();
 
         try {
-            await userService.withdrawUser(userId);
-
-            // 사용자의 인벤토리와 펫 보관함 삭제
+            // 사용자의 인벤토리, 펫보관함, 히스토리 삭제 및 탈퇴처리
+            await historyService.deleteAllHistory(userId);
             await inventoryService.deleteInventoryByUserId(userId);
             await myPetService.deletePetStorageByUserId(userId);
+
+            // WithdrawUserAndToken 메서드를 호출하여 새로운 토큰 얻기
+            const newToken = await userService.WithdrawUserAndToken(userId);
+
+            // 기존 토큰 삭제 및 새로운 토큰 저장
+            res.clearCookie('token');
+            res.cookie('token', newToken);
 
             res.status(200).json({ message: '탈퇴 처리 완료' });
         } catch (error) {
