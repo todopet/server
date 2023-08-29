@@ -23,6 +23,9 @@ class TodoCategoryService {
     async deleteCategory(id) {
         return await this.todoCategoryModel.delete(id);
     }
+    async deleteAllTodoCategoiesByUserId(userId) {
+        return await this.todoCategoryModel.deleteMany(userId);
+    }
 }
 
 export default TodoCategoryService;

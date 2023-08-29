@@ -3,7 +3,9 @@ import {
     UserService,
     InventoryService,
     MyPetService,
-    HistoryService
+    HistoryService,
+    TodoCategoryService,
+    TodoContentService
 } from '../services/index.js';
 
 import cookieParser from 'cookie-parser';
@@ -158,12 +160,16 @@ authRouter.post(
         const myPetService = new MyPetService();
         const userService = new UserService();
         const historyService = new HistoryService();
+        const todoCategoryService = new TodoCategoryService();
+        const todoContentService = new TodoContentService();
 
         try {
             // 사용자의 인벤토리, 펫보관함, 히스토리 삭제 및 탈퇴처리
-            await historyService.deleteAllHistory(userId);
+            await historyService.deleteAllHistoryByUserId(userId);
             await inventoryService.deleteInventoryByUserId(userId);
             await myPetService.deletePetStorageByUserId(userId);
+            await todoContentService.deleteAllTodoContentsByUserId(userId);
+            await todoCategoryService.deleteAllTodoCategoiesByUserId(userId);
 
             // WithdrawUserAndToken 메서드를 호출하여 새로운 토큰 얻기
             const newToken = await userService.WithdrawUserAndToken(userId);

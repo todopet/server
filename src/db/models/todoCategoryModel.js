@@ -30,6 +30,9 @@ class TodoCategoryModel {
     async delete(id) {
         return await TodoCategory.findByIdAndDelete(id).lean();
     }
+    async deleteMany(userId) {
+        return await TodoCategory.deleteMany({ userId }).lean();
+    }
 }
 
 export default TodoCategoryModel;
