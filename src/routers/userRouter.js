@@ -16,6 +16,16 @@ userRouter.get(
     })
 );
 
+// 유저 정보만 단건 조회
+userRouter.get(
+    '/user',
+    asyncHandler(async (req, res, next) => {
+        const userId = req.currentUserId;
+        const user = await userService.findUserById(userId);
+        return user;
+    })
+);
+
 // 마이페이지 정보 전달 받기
 userRouter.get(
     '/',
