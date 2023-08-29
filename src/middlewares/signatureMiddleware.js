@@ -1,6 +1,5 @@
 const signatureMiddleware = (req, res, next) => {
     const receivedTime = req.headers['x-custom-Time'];
-
     const checkReceivedTime = new Date(receivedTime); //프론트에서 헤더에 포함되어서 보냄
     const currentTime = new Date().getTime();
 

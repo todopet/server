@@ -110,7 +110,16 @@ class TodoContentService {
         result.message = message;
         return result;
     }
-
+    async deleteAllTodoContentsByUserId(userId) {
+        const categoryId = await this.todoCategoryModel.findByUserId(userId);
+        if (categoryId) {
+            for (let i = 0; i < categoryId.length; i++) {
+                await todoContentModel.deleteTodoContentByCategoryId(
+                    categoryId[i]._id.toString()
+                );
+            }
+        }
+    }
     async deleteContent(id) {
         return await todoContentModel.delete(id);
     }

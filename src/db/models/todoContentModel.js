@@ -52,6 +52,9 @@ class TodoContentModel {
     async delete(id) {
         return await this.todoContentModel.findByIdAndDelete(id).lean();
     }
+    async deleteTodoContentByCategoryId(categoryId) {
+        return await this.todoContentModel.deleteMany({ categoryId });
+    }
 }
 
 export default TodoContentModel;
