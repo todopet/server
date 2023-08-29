@@ -141,13 +141,14 @@ authRouter.get(
     })
 );
 
-authRouter.get('/logout', (req, res) => {
+authRouter.post('/logout', (req, res) => {
     res.clearCookie('token'); // 토큰 쿠키 삭제
-    res.redirect('/api/v1'); // 로그아웃 후 루트 페이지로 리다이렉트
+    res.status(200).json({ message: '로그아웃 처리 완료' });
+    // res.redirect('/api/v1'); // 로그아웃 후 루트 페이지로 리다이렉트
 });
 
 //회원탈퇴
-authRouter.patch(
+authRouter.post(
     '/withdraw',
     userAuthorization,
     asyncHandler(async (req, res) => {
