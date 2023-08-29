@@ -24,6 +24,10 @@ class HistoryService {
         return await this.historyModel.delete(id);
     }
 
+    async deleteAllHistory(id) {
+        return await this.historyModel.deleteMany(id);
+    }
+
     async getRanking() {
         // 현재 시간
         const currentDate = dayjs();

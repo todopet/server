@@ -51,5 +51,9 @@ class HistoryModel {
             }
         ]);
     }
+
+    async deleteMany(userId) {
+        return await History.deleteMany({ userId }).lean();
+    }
 }
 export default HistoryModel;
