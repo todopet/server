@@ -21,7 +21,7 @@ export const formatDateToString = (date) => {
  * 작성일자 : 2023-08-28 (월)
  * 작성내용 : 기준 날짜와 현재 날짜의 시간 차이를 구하여 일자로 반환한다.
  * @param {Date} date 날짜
- * @returns string 형태의 시간 차이 값
+ * @returns number 형태의 시간 차이 값
  */
 export const setKoreaDay = (date) => {
     const createdDate = new Date(date);
@@ -30,5 +30,5 @@ export const setKoreaDay = (date) => {
     const timeDiff = currentDate.getTime() - createdDate.getTime();
     const day = Math.floor(timeDiff / (24 * 60 * 60 * 1000));
 
-    return day.toString();
+    return day;
 };
