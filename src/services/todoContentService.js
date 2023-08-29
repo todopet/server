@@ -65,7 +65,7 @@ class TodoContentService {
         // 히스토리가 존재하지 않으면 보상 지급 및 히스토리 추가
         if (!isHistory && status === 'completed') {
             // 히스토리가 하루 10개 이상 있을 경우 보상을 지급하지 않는다.
-            if (history.length < 10) {
+            if (history.length < 100) {
                 const inventoryId =
                     await this.inventoryService.getInventoryIdByUserId(userId);
                 inventoryCount = await this.inventoryService.getInventoryCount(
