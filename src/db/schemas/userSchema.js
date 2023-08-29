@@ -9,7 +9,6 @@ const userSchema = new Schema(
         },
         nickname: {
             type: String,
-            unique: true,
             required: true
         },
         membershipStatus: {

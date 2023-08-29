@@ -24,7 +24,7 @@ class HistoryService {
         return await this.historyModel.delete(id);
     }
 
-    async deleteAllHistory(id) {
+    async deleteAllHistoryByUserId(id) {
         return await this.historyModel.deleteMany(id);
     }
 
