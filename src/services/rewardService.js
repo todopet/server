@@ -7,14 +7,14 @@ class RewardService {
     }
 
     async giveReward(userId) {
-        const inventoryId = await this.inventoryService.getInventoryIdByUserId(
-            userId
-        );
+        const [inventoryId, itemList] = await Promise.all([
+            this.inventoryService.getInventoryIdByUserId(userId),
+            this.itemService.getAllItems()
+        ]);
 
-        const itemList = await this.itemService.getAllItems();
         const guaranteedItems = itemList.filter(
             (item) => item.probability === 100
-        );
+        ); 
 
         // 보상 아이템 중에서 가중치 랜덤으로 받을 아이템 선택
         const totalWeight = itemList.reduce(

@@ -1,6 +1,5 @@
 import express from 'express';
 import dotenv from 'dotenv';
-dotenv.config();
 import cors from 'cors';
 import path from 'path';
 import mongoose from 'mongoose';
@@ -9,17 +8,20 @@ import axios from 'axios';
 import { v1 } from './src/routers/index.js';
 import authRouter from './src/routers/authRouter.js';
 import userAuthorization from './src/middlewares/userAuthorization.js';
+dotenv.config();
 
 const app = express();
-const { PORT, DB_URL } = process.env;
-const __dirname = path.resolve();
+const config = {
+    PORT: process.env.PORT,
+    DB_URL: process.env.DB_URL
+};
 
-mongoose.connect(DB_URL, {
+mongoose.connect(config.DB_URL, {
     dbName: 'Todo-Tamers'
 });
 
 mongoose.connection.on('connected', () =>
-    console.log('정상적으로 MongoDB 서버에 연결되었습니다. ' + DB_URL)
+    console.log('정상적으로 MongoDB 서버에 연결되었습니다. ')
 );
 
 const corsOptions = {
@@ -48,8 +50,8 @@ app.use(express.urlencoded({ extended: false }));
 app.use('/api/v1', authRouter);
 app.use('/api/v1', userAuthorization, v1);
 
-app.listen(PORT, function () {
-    console.log(`서버가 ${PORT}에서 실행 중....`);
+app.listen(config.PORT, function () {
+    console.log(`서버가 ${config.PORT}에서 실행 중....`);
 });
 
 export default app;

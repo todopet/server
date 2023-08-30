@@ -14,6 +14,7 @@ import axios from 'axios';
 import asyncHandler from '../middlewares/asyncHandler.js';
 import userAuthorization from '../middlewares/userAuthorization.js';
 import jwt from '../utils/jwt.js';
+import mongoose from 'mongoose';
 
 dotenv.config();
 const authRouter = Router();
@@ -61,50 +62,60 @@ authRouter.get('/login', (req, res) => {
 authRouter.get(
     '/login/redirect',
     asyncHandler(async (req, res) => {
-        const { code } = req.query;
+        const session = await mongoose.startSession();
+        session.startTransaction();
 
-        const resp = await axios.post(GOOGLE_TOKEN_URL, {
-            code,
-            client_id: GOOGLE_CLIENT_ID,
-            client_secret: GOOGLE_CLIENT_SECRET,
-            redirect_uri: GOOGLE_LOGIN_REDIRECT_URI,
-            grant_type: 'authorization_code'
-        });
-        const resp2 = await axios.get(GOOGLE_USERINFO_URL, {
-            headers: {
-                Authorization: `Bearer ${resp.data.access_token}`
+        try {
+            const { code } = req.query;
+
+            const resp = await axios.post(GOOGLE_TOKEN_URL, {
+                code,
+                client_id: GOOGLE_CLIENT_ID,
+                client_secret: GOOGLE_CLIENT_SECRET,
+                redirect_uri: GOOGLE_LOGIN_REDIRECT_URI,
+                grant_type: 'authorization_code'
+            });
+            const resp2 = await axios.get(GOOGLE_USERINFO_URL, {
+                headers: {
+                    Authorization: `Bearer ${resp.data.access_token}`
+                }
+            });
+
+            const userService = new UserService();
+            let user = await userService.findByGoogleId(resp2.data.id);
+
+            if (user) {
+                // Check if the user's membershipStatus is 'withdrawn'
+                if (user.membershipStatus === 'withdrawn') {
+                    return res.status(403).json({
+                        message: '탈퇴한 회원입니다. 로그인 할 수 없습니다.'
+                    });
+                }
+
+                // Check if the user's membershipStatus is 'active'
+                if (user.membershipStatus !== 'active') {
+                    return res.status(403).json({
+                        message: '비활성화된 회원입니다. 로그인 할 수 없습니다.'
+                    });
+                }
+            } else {
+                // If user not found, add the user
+                user = await userService.addUser(resp2.data);
             }
-        });
 
-        const userService = new UserService();
-        let user = await userService.findByGoogleId(resp2.data.id);
+            const token = jwt.sign(user._id);
 
-        if (user) {
-            // Check if the user's membershipStatus is 'withdrawn'
-            if (user.membershipStatus === 'withdrawn') {
-                return res.status(403).json({
-                    message: '탈퇴한 회원입니다. 로그인 할 수 없습니다.'
-                });
-            }
-
-            // Check if the user's membershipStatus is 'active'
-            if (user.membershipStatus !== 'active') {
-                return res.status(403).json({
-                    message: '비활성화된 회원입니다. 로그인 할 수 없습니다.'
-                });
-            }
-        } else {
-            // If user not found, add the user
-            user = await userService.addUser(resp2.data);
+            res.cookie('token', token);
+            // TODO: 환경변수로라도.. 관리
+            // 배포환경에서는 /todo 만 놓으면 됨 origin이 같기 때문.
+            // http://localhost:3000/todo
+            res.redirect('http://localhost:3000/todo'); // http://localhost:3001/api/v1
+            await session.commitTransaction();
+            session.endSession();
+        } catch (error) {
+            await session.abortTransaction();
+            session.endSession();
         }
-
-        const token = jwt.sign(user._id);
-
-        res.cookie('token', token);
-        // TODO: 환경변수로라도.. 관리
-        // 배포환경에서는 /todo 만 놓으면 됨 origin이 같기 때문.
-        // http://localhost:3000/todo
-        res.redirect('http://localhost:3000/todo'); // http://localhost:3001/api/v1
     })
 );
 
