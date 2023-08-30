@@ -11,9 +11,10 @@ const userAuthorization = async (req, res, next) => {
         (!serverToken || serverToken === 'null') &&
         (!clientToken || clientToken === 'null')
     ) {
-        console.log('authorization 토큰이 없음');
-        next();
-        return;
+        return res.status(401).json({
+            result: 'Unauthorized',
+            reason: '로그인한 유저만 사용할 수 있는 서비스입니다.'
+        });
     }
 
     try {
@@ -23,7 +24,10 @@ const userAuthorization = async (req, res, next) => {
 
         next();
     } catch (err) {
-        next(err);
+        return res.status(401).json({
+            result: 'Unauthorized',
+            reason: '로그인한 유저만 사용할 수 있는 서비스입니다.'
+        });
     }
 };
 
