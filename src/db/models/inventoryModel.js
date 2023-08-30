@@ -4,7 +4,7 @@ import { inventorySchema } from '../schemas/index.js';
 const InventoryCategory = model('inventories', inventorySchema);
 
 class InventoryModel {
-    async findByInventoryId(inventoryId) {
+    async findById(inventoryId) {
         return await InventoryCategory.findOne({ _id: inventoryId }).lean();
     }
     async findByUserId(userId) {

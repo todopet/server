@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const secretKey = process.env.JWT_SECRET || 'Tamers';
+const secretKey = process.env.JWT_SECRET;
 
 const sign = (_id) => {
     try {
