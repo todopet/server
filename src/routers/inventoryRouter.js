@@ -16,9 +16,7 @@ inventoryRouter.get(
             userId
         );
         console.log(inventoryId);
-        const result = await inventoryService.getInventoryByInventoryId(
-            inventoryId
-        );
+        const result = await inventoryService.getInventoryById(inventoryId);
         res.json(buildResponse(result));
     })
 );
@@ -57,7 +55,7 @@ inventoryRouter.get(
 
 //아이템 사용
 inventoryRouter.post(
-    '/:inventoryItemId/use',
+    '/:inventoryItemId/put',
     asyncHandler(async (req, res, next) => {
         const { inventoryItemId } = req.params;
         const { quantity } = req.body;
@@ -102,7 +100,7 @@ inventoryRouter.post(
 
 // 인벤토리 아이템 추가
 inventoryRouter.post(
-    '/addItem',
+    '/items',
     asyncHandler(async (req, res, next) => {
         const { itemId, quantity } = req.body;
         const result = await inventoryService.addSelectedItemToInventory(

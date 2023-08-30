@@ -24,7 +24,7 @@ class MyPetService {
 
     // myPet 단일 조회
     async getMyPetByPetId(petStorageId, petId) {
-        const petStorage = await this.getPetStorageByPetStorageId(petStorageId);
+        const petStorage = await this.getPetStorageById(petStorageId);
         const pet = petStorage.pets.find((p) => p._id.toString() === petId);
 
         if (!pet) {
@@ -34,7 +34,7 @@ class MyPetService {
         return pet;
     }
 
-    async getPetStorageByPetStorageId(petStorageId) {
+    async getPetStorageById(petStorageId) {
         const petStorage = await this.myPetModel.findByPetStorageId(
             petStorageId
         );
@@ -55,9 +55,7 @@ class MyPetService {
             throw new Error('Invalid userId');
         }
 
-        const petService = new PetService();
-
-        const lowestLevelPet = await petService.getLowestLevel();
+        const lowestLevelPet = await this.petService.getLowestLevel();
 
         const petStorage = await this.myPetModel.create({
             userId: userId.toString(),
@@ -83,10 +81,10 @@ class MyPetService {
             condition: pet.condition
         };
 
-        const petStorageId = await this.getPetStorageIdByUserId(userId);
-        const petStorage = await this.myPetModel.findByPetStorageId(
-            petStorageId
-        );
+        const [petStorageId, petStorage] = await Promise.all([
+            this.getPetStorageIdByUserId(userId),
+            this.myPetModel.findByPetStorageId(petStorageId)
+        ]);
 
         petStorage.pets.push({
             pet: pet
@@ -101,7 +99,7 @@ class MyPetService {
     }
     //업데이트 시간과 현재 시간의 차이를 계산하여 펫 status 반환
     async updatePetStatus(petStorageId) {
-        const petStorage = await this.getPetStorageByPetStorageId(petStorageId);
+        const petStorage = await this.getPetStorageById(petStorageId);
 
         const lastUpdateTime = dayjs(petStorage.updatedAt);
         const currentTime = dayjs();
@@ -139,7 +137,7 @@ class MyPetService {
 
     //펫 정보 각각 업데이트
     async updatePetInMyPet(petStorageId, petId, updatedFields) {
-        const petStorage = await this.getPetStorageByPetStorageId(petStorageId);
+        const petStorage = await this.getPetStorageById(petStorageId);
 
         const petToUpdate = petStorage.pets.find(
             (pet) => pet._id.toString() === petId
@@ -150,11 +148,6 @@ class MyPetService {
         }
 
         Object.assign(petToUpdate.pet, updatedFields);
-
-        const updatedPetStorage = await this.myPetModel.update(
-            petStorageId,
-            petStorage
-        );
 
         return petToUpdate;
     }
@@ -168,7 +161,7 @@ class MyPetService {
     ) {
         const petStorageId = await this.getPetStorageIdByUserId(userId);
 
-        const petStorage = await this.getPetStorageByPetStorageId(petStorageId);
+        const petStorage = await this.getPetStorageById(petStorageId);
         const userPetName = petStorage.pets[0].pet.petName;
 
         const updatedPet = { ...petStorage };
@@ -235,7 +228,7 @@ class MyPetService {
                 userPetName
             );
 
-            const promises = statuses.map(async (status) => {
+            const promises = statuses.map((status) => {
                 if (
                     updatedPet.pets[0].pet[status] !== undefined ||
                     updatedPet.pets[0].pet[status] === 0
@@ -250,6 +243,7 @@ class MyPetService {
                     }
                 }
             });
+            console.log(promises)
 
             await Promise.all(promises);
         }
@@ -262,7 +256,7 @@ class MyPetService {
     }
     //아이템 사용시 펫 상태 업데이트 저장
     async statusUpdatePetInMyPet(petStorageId, updatePetId, updatedPet) {
-        const petStorage = await this.getPetStorageByPetStorageId(petStorageId);
+        const petStorage = await this.getPetStorageById(petStorageId);
 
         const petToUpdate = petStorage.pets.find(
             (pet) => pet._id.toString() === updatePetId.toString()

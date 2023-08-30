@@ -21,15 +21,6 @@ class MyPetModel {
         return (await MyPet.create(petStorage)).toObject();
     }
 
-    async createPetStorage(userId, petId) {
-        const petStorage = {
-            userId: userId,
-            pet: petId
-        };
-
-        return await MyPet.create(petStorage);
-    }
-
     async update(petStorageId, myPet) {
         const updatedPetStorage = await MyPet.findOneAndUpdate(
             { _id: petStorageId },
