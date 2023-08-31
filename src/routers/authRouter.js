@@ -23,16 +23,16 @@ const mode = process.env.MODE;
 const config = {
   ROOT: process.env.ROOT ?? 'http://localhost:3000',
   PORT: process.env.PORT,
-  GOOGLE_CLIENT_ID: mode
+  GOOGLE_CLIENT_ID: !!mode
     ? process.env.GOOGLE_CLIENT_ID
     : process.env.LOCAL_GOOGLE_CLIENT_ID,
-  GOOGLE_CLIENT_SECRET: mode
+  GOOGLE_CLIENT_SECRET: !!mode
     ? process.env.GOOGLE_CLIENT_SECRET
     : process.env.LOCAL_GOOGLE_CLIENT_SECRET,
-  GOOGLE_LOGIN_REDIRECT_URI: mode
+  GOOGLE_LOGIN_REDIRECT_URI: !!mode
     ? process.env.GOOGLE_LOGIN_REDIRECT_URI
     : process.env.LOCAL_GOOGLE_LOGIN_REDIRECT_URI,
-  GOOGLE_SIGNUP_REDIRECT_URI: mode
+  GOOGLE_SIGNUP_REDIRECT_URI: !!mode
     ? process.env.GOOGLE_SIGNUP_REDIRECT_URI
     : process.env.LOCAL_GOOGLE_SIGNUP_REDIRECT_URI,
   GOOGLE_TOKEN_URL: process.env.GOOGLE_TOKEN_URL,
@@ -78,7 +78,6 @@ authRouter.get(
 
     try {
       const { code } = req.query;
-
       const resp = await axios.post(config.GOOGLE_TOKEN_URL, {
         code,
         client_id: config.GOOGLE_CLIENT_ID,
@@ -91,10 +90,8 @@ authRouter.get(
           Authorization: `Bearer ${resp.data.access_token}`
         }
       });
-
       const userService = new UserService();
       let user = await userService.findByGoogleId(resp2.data.id);
-
       if (user) {
         // Check if the user's membershipStatus is 'withdrawn'
         if (user.membershipStatus === 'withdrawn') {
@@ -113,14 +110,12 @@ authRouter.get(
         // If user not found, add the user
         user = await userService.addUser(resp2.data);
       }
-
       const token = jwt.sign(user._id);
-
       res.cookie('token', token);
       // TODO: 환경변수로라도.. 관리
       // 배포환경에서는 /todo 만 놓으면 됨 origin이 같기 때문.
       // http://localhost:3000/todo
-      res.redirect(`${ROOT}/todo`); // http://localhost:3001/api/v1
+      res.redirect(`${config.ROOT}/todo`); // http://localhost:3001/api/v1
       await session.commitTransaction();
       session.endSession();
     } catch (error) {
