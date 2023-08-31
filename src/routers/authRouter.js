@@ -78,7 +78,6 @@ authRouter.get(
 
     try {
       const { code } = req.query;
-      console.log('aa');
       const resp = await axios.post(config.GOOGLE_TOKEN_URL, {
         code,
         client_id: config.GOOGLE_CLIENT_ID,
@@ -86,17 +85,13 @@ authRouter.get(
         redirect_uri: config.GOOGLE_LOGIN_REDIRECT_URI,
         grant_type: 'authorization_code'
       });
-      console.log(resp);
-      console.log('bb');
       const resp2 = await axios.get(config.GOOGLE_USERINFO_URL, {
         headers: {
           Authorization: `Bearer ${resp.data.access_token}`
         }
       });
-      console.log('bb');
       const userService = new UserService();
       let user = await userService.findByGoogleId(resp2.data.id);
-      console.log('cc');
       if (user) {
         // Check if the user's membershipStatus is 'withdrawn'
         if (user.membershipStatus === 'withdrawn') {
@@ -115,16 +110,11 @@ authRouter.get(
         // If user not found, add the user
         user = await userService.addUser(resp2.data);
       }
-      console.log('dd');
       const token = jwt.sign(user._id);
-      console.log('ee');
       res.cookie('token', token);
-      console.log('ff');
       // TODO: 환경변수로라도.. 관리
       // 배포환경에서는 /todo 만 놓으면 됨 origin이 같기 때문.
       // http://localhost:3000/todo
-      console.log(`${config.ROOT}/todo`);
-
       res.redirect(`${config.ROOT}/todo`); // http://localhost:3001/api/v1
       await session.commitTransaction();
       session.endSession();
