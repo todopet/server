@@ -19,12 +19,22 @@ import mongoose from 'mongoose';
 dotenv.config();
 const authRouter = Router();
 
+const mode = process.env.MODE;
 const config = {
+  ROOT: process.env.ROOT ?? 'http://localhost:3000',
   PORT: process.env.PORT,
-  GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
-  GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
-  GOOGLE_LOGIN_REDIRECT_URI: process.env.GOOGLE_LOGIN_REDIRECT_URI,
-  GOOGLE_SIGNUP_REDIRECT_URI: process.env.GOOGLE_SIGNUP_REDIRECT_URI,
+  GOOGLE_CLIENT_ID: mode
+    ? process.env.GOOGLE_CLIENT_ID
+    : process.env.LOCAL_GOOGLE_CLIENT_ID,
+  GOOGLE_CLIENT_SECRET: mode
+    ? process.env.GOOGLE_CLIENT_SECRET
+    : process.env.LOCAL_GOOGLE_CLIENT_SECRET,
+  GOOGLE_LOGIN_REDIRECT_URI: mode
+    ? process.env.GOOGLE_LOGIN_REDIRECT_URI
+    : process.env.LOCAL_GOOGLE_LOGIN_REDIRECT_URI,
+  GOOGLE_SIGNUP_REDIRECT_URI: mode
+    ? process.env.GOOGLE_SIGNUP_REDIRECT_URI
+    : process.env.LOCAL_GOOGLE_SIGNUP_REDIRECT_URI,
   GOOGLE_TOKEN_URL: process.env.GOOGLE_TOKEN_URL,
   GOOGLE_USERINFO_URL: process.env.GOOGLE_USERINFO_URL
 };
@@ -41,15 +51,6 @@ const config = {
 //const userService = new UserService();
 
 authRouter.use(cookieParser());
-
-// authRouter.get('/', (req, res) => {
-//     res.send(`
-//   <h1>OAuth</h1>
-//   <a href="/api/v1/login">Log in<a>
-//   <a href="/api/v1/signup">Sign up</a>
-//   <a href="/api/v1/withdraw">회원 탈퇴</a>
-//   `);
-// });
 
 //로그인
 authRouter.get('/login', (req, res) => {
@@ -119,7 +120,7 @@ authRouter.get(
       // TODO: 환경변수로라도.. 관리
       // 배포환경에서는 /todo 만 놓으면 됨 origin이 같기 때문.
       // http://localhost:3000/todo
-      res.redirect('https://kdt-sw-5-2-team14.elicecoding.com/todo'); // http://localhost:3001/api/v1
+      res.redirect(`${ROOT}/todo`); // http://localhost:3001/api/v1
       await session.commitTransaction();
       session.endSession();
     } catch (error) {
