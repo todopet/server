@@ -19,32 +19,42 @@ import mongoose from 'mongoose';
 dotenv.config();
 const authRouter = Router();
 
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
-const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
-const GOOGLE_LOGIN_REDIRECT_URI = 'http://localhost:3001/api/v1/login/redirect';
-const GOOGLE_SIGNUP_REDIRECT_URI =
-    'http://localhost:3001/api/v1/signup/redirect';
-const GOOGLE_TOKEN_URL = 'https://oauth2.googleapis.com/token';
-const GOOGLE_USERINFO_URL = 'https://www.googleapis.com/oauth2/v2/userinfo';
-const PORT = process.env.PORT;
+const config = {
+    PORT: process.env.PORT,
+    GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
+    GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
+    GOOGLE_LOGIN_REDIRECT_URI: process.env.GOOGLE_LOGIN_REDIRECT_URI,
+    GOOGLE_SIGNUP_REDIRECT_URI: process.env.GOOGLE_SIGNUP_REDIRECT_URI,
+    GOOGLE_TOKEN_URL: process.env.GOOGLE_TOKEN_URL,
+    GOOGLE_USERINFO_URL: process.env.GOOGLE_USERINFO_URL
+}
+
+// const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+// const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+// const GOOGLE_LOGIN_REDIRECT_URI = 'http://localhost:3001/api/v1/login/redirect';
+// const GOOGLE_SIGNUP_REDIRECT_URI =
+//     'http://localhost:3001/api/v1/signup/redirect';
+// const GOOGLE_TOKEN_URL = 'https://oauth2.googleapis.com/token';
+// const GOOGLE_USERINFO_URL = 'https://www.googleapis.com/oauth2/v2/userinfo';
+// const PORT = process.env.PORT;
 
 //const userService = new UserService();
 
 authRouter.use(cookieParser());
 
-authRouter.get('/', (req, res) => {
-    res.send(`
-  <h1>OAuth</h1>
-  <a href="/api/v1/login">Log in<a>
-  <a href="/api/v1/signup">Sign up</a>
-  <a href="/api/v1/withdraw">회원 탈퇴</a>
-  `);
-});
+// authRouter.get('/', (req, res) => {
+//     res.send(`
+//   <h1>OAuth</h1>
+//   <a href="/api/v1/login">Log in<a>
+//   <a href="/api/v1/signup">Sign up</a>
+//   <a href="/api/v1/withdraw">회원 탈퇴</a>
+//   `);
+// });
 
 //로그인
 authRouter.get('/login', (req, res) => {
     res.redirect(
-        `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${GOOGLE_LOGIN_REDIRECT_URI}&response_type=code&scope=email profile`
+        `https://accounts.google.com/o/oauth2/v2/auth?client_id=${config.GOOGLE_CLIENT_ID}&redirect_uri=${config.GOOGLE_LOGIN_REDIRECT_URI}&response_type=code&scope=email profile`
     );
     // let url = "https://accounts.google.com/o/oauth2/v2/auth";
     // //client_id는 env에 저장
@@ -68,14 +78,14 @@ authRouter.get(
         try {
             const { code } = req.query;
 
-            const resp = await axios.post(GOOGLE_TOKEN_URL, {
+            const resp = await axios.post(config.GOOGLE_TOKEN_URL, {
                 code,
-                client_id: GOOGLE_CLIENT_ID,
-                client_secret: GOOGLE_CLIENT_SECRET,
-                redirect_uri: GOOGLE_LOGIN_REDIRECT_URI,
+                client_id: config.GOOGLE_CLIENT_ID,
+                client_secret: config.GOOGLE_CLIENT_SECRET,
+                redirect_uri: config.GOOGLE_LOGIN_REDIRECT_URI,
                 grant_type: 'authorization_code'
             });
-            const resp2 = await axios.get(GOOGLE_USERINFO_URL, {
+            const resp2 = await axios.get(config.GOOGLE_USERINFO_URL, {
                 headers: {
                     Authorization: `Bearer ${resp.data.access_token}`
                 }
@@ -122,7 +132,7 @@ authRouter.get(
 //회원가입
 authRouter.get('/signup', (req, res) => {
     res.redirect(
-        `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${GOOGLE_SIGNUP_REDIRECT_URI}&response_type=code&scope=email profile`
+        `https://accounts.google.com/o/oauth2/v2/auth?client_id=${config.GOOGLE_CLIENT_ID}&redirect_uri=${config.GOOGLE_SIGNUP_REDIRECT_URI}&response_type=code&scope=email profile`
     );
 });
 
@@ -132,14 +142,14 @@ authRouter.get(
     asyncHandler(async (req, res) => {
         const { code } = req.query;
 
-        const resp = await axios.post(GOOGLE_TOKEN_URL, {
+        const resp = await axios.post(config.GOOGLE_TOKEN_URL, {
             code,
-            client_id: GOOGLE_CLIENT_ID,
-            client_secret: GOOGLE_CLIENT_SECRET,
-            redirect_uri: GOOGLE_SIGNUP_REDIRECT_URI,
+            client_id: config.GOOGLE_CLIENT_ID,
+            client_secret: config.GOOGLE_CLIENT_SECRET,
+            redirect_uri: config.GOOGLE_SIGNUP_REDIRECT_URI,
             grant_type: 'authorization_code'
         });
-        const resp2 = await axios.get(GOOGLE_USERINFO_URL, {
+        const resp2 = await axios.get(config.GOOGLE_USERINFO_URL, {
             headers: {
                 Authorization: `Bearer ${resp.data.access_token}`
             }
