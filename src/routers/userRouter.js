@@ -63,10 +63,15 @@ userRouter.patch(
 );
 
 //회원 검증
-userRouter.get('/auth', userAuthorization, (req, res) => {
-  res.json({
-    result: 'Success',
-    message: '토큰 검증 완료'
-  });
-});
+userRouter.get(
+  '/auth',
+  userAuthorization,
+  asyncHandler((req, res) => {
+    return {
+      status: 200,
+      result: 'Success',
+      message: '토큰 검증 완료'
+    };
+  })
+);
 export default userRouter;
