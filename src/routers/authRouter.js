@@ -19,15 +19,36 @@ import mongoose from 'mongoose';
 dotenv.config();
 const authRouter = Router();
 
+const mode = process.env.MODE;
 const config = {
+  ROOT: process.env.ROOT ?? 'http://localhost:3000',
   PORT: process.env.PORT,
-  GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
-  GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
-  GOOGLE_LOGIN_REDIRECT_URI: process.env.GOOGLE_LOGIN_REDIRECT_URI,
-  GOOGLE_SIGNUP_REDIRECT_URI: process.env.GOOGLE_SIGNUP_REDIRECT_URI,
+  GOOGLE_CLIENT_ID: mode
+    ? process.env.GOOGLE_CLIENT_ID
+    : process.env.LOCAL_GOOGLE_CLIENT_ID,
+  GOOGLE_CLIENT_SECRET: mode
+    ? process.env.GOOGLE_CLIENT_SECRET
+    : process.env.LOCAL_GOOGLE_CLIENT_SECRET,
+  GOOGLE_LOGIN_REDIRECT_URI: mode
+    ? process.env.GOOGLE_LOGIN_REDIRECT_URI
+    : process.env.LOCAL_GOOGLE_LOGIN_REDIRECT_URI,
+  GOOGLE_SIGNUP_REDIRECT_URI: mode
+    ? process.env.GOOGLE_SIGNUP_REDIRECT_URI
+    : process.env.LOCAL_GOOGLE_SIGNUP_REDIRECT_URI,
   GOOGLE_TOKEN_URL: process.env.GOOGLE_TOKEN_URL,
   GOOGLE_USERINFO_URL: process.env.GOOGLE_USERINFO_URL
 };
+
+// const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+// const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+// const GOOGLE_LOGIN_REDIRECT_URI = 'http://localhost:3001/api/v1/login/redirect';
+// const GOOGLE_SIGNUP_REDIRECT_URI =
+//     'http://localhost:3001/api/v1/signup/redirect';
+// const GOOGLE_TOKEN_URL = 'https://oauth2.googleapis.com/token';
+// const GOOGLE_USERINFO_URL = 'https://www.googleapis.com/oauth2/v2/userinfo';
+// const PORT = process.env.PORT;
+
+//const userService = new UserService();
 
 authRouter.use(cookieParser());
 
@@ -36,6 +57,17 @@ authRouter.get('/login', (req, res) => {
   res.redirect(
     `https://accounts.google.com/o/oauth2/v2/auth?client_id=${config.GOOGLE_CLIENT_ID}&redirect_uri=${config.GOOGLE_LOGIN_REDIRECT_URI}&response_type=code&scope=email profile`
   );
+  // let url = "https://accounts.google.com/o/oauth2/v2/auth";
+  // //client_id는 env에 저장
+  // url += `?client_id=${GOOGLE_CLIENT_ID}`;
+  // url += `&redirect_uri=${GOOGLE_LOGIN_REDIRECT_URI}`;
+  // //필수옵션
+  // url += `&response_type=code`;
+  // //구글에 등록된 유저 정보 email, profile을 가져오겠다 명시
+  // url += `&scope=email profile`;
+  // //완성된 url로 이동
+  // //이 url이 위에서 본 구글 계정을 선택하는 화면임.
+  // res.redirect(url);
 });
 
 authRouter.get(
@@ -88,7 +120,7 @@ authRouter.get(
       // TODO: 환경변수로라도.. 관리
       // 배포환경에서는 /todo 만 놓으면 됨 origin이 같기 때문.
       // http://localhost:3000/todo
-      res.redirect('http://localhost:3000/todo'); // http://localhost:3001/api/v1
+      res.redirect(`${ROOT}/todo`); // http://localhost:3001/api/v1
       await session.commitTransaction();
       session.endSession();
     } catch (error) {
