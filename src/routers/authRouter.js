@@ -119,7 +119,7 @@ authRouter.get(
       // TODO: 환경변수로라도.. 관리
       // 배포환경에서는 /todo 만 놓으면 됨 origin이 같기 때문.
       // http://localhost:3000/todo
-      res.redirect('/todo'); // http://localhost:3001/api/v1
+      res.redirect('https://kdt-sw-5-2-team14.elicecoding.com/todo'); // http://localhost:3001/api/v1
       await session.commitTransaction();
       session.endSession();
     } catch (error) {
