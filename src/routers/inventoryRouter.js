@@ -13,7 +13,6 @@ inventoryRouter.get(
   asyncHandler(async (req, res, next) => {
     const userId = req.currentUserId;
     const inventoryId = await inventoryService.getInventoryIdByUserId(userId);
-    console.log(inventoryId);
     const result = await inventoryService.getInventoryById(inventoryId);
     res.json(buildResponse(result));
   })
@@ -86,6 +85,7 @@ inventoryRouter.post(
       throw new Error('Failed to use item or item not found in inventory');
     }
     const result = { updatedPet, itemUsed };
+
     // 아이템 사용 결과 및 업데이트된 펫 정보 반환
     return result;
   })
