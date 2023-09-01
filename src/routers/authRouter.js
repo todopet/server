@@ -15,6 +15,7 @@ import asyncHandler from '../middlewares/asyncHandler.js';
 import userAuthorization from '../middlewares/userAuthorization.js';
 import jwt from '../utils/jwt.js';
 import mongoose from 'mongoose';
+import { buildResponse } from '../misc/utils.js';
 
 dotenv.config();
 const authRouter = Router();
