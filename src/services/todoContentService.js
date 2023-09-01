@@ -50,16 +50,15 @@ class TodoContentService {
 
   async updateContent(content) {
     const { id, userId, status } = content;
-    // 내용 또는 상태 수정
-    const result = await todoContentModel.update(content);
-
-    // 히스토리 조회 (해당 날짜의 히스토리 조회)
-    const history = await this.historyService.getHistories(userId);
+    // 내용 또는 상태 수정 - 히스토리 조회(해당 날짜의 히스토리 조회)
+    const [result, history] = await Promise.all([
+      todoContentModel.update(content),
+      this.historyService.getHistories(userId)
+    ]);
 
     // 특정 todo에 대한 히스토리 존재 여부 확인
     const isHistory = history.find((data) => data.contentId === id);
 
-    let message = null;
     let inventoryCount = 0;
 
     // 히스토리가 존재하지 않으면 보상 지급 및 히스토리 추가
@@ -75,7 +74,7 @@ class TodoContentService {
 
         // 인벤토리 아이템 갯수 체크. 50개 넘으면 안줌
         if (inventoryCount >= maxVolume) {
-          message = {
+          result.message = {
             type: 'FULL',
             reward: null
           };
@@ -86,14 +85,14 @@ class TodoContentService {
           inventoryCount = await this.inventoryService.getInventoryCount(
             inventoryId
           );
-          message = {
+          result.message = {
             type: reward.status.length >= 4 ? 'SPECIAL' : 'NORMAL',
             inventoryCount,
             reward: reward.name
           };
         }
       } else {
-        message = {
+        result.message = {
           type: 'ALL_RECEIVED',
           reward: null
         };
@@ -101,13 +100,12 @@ class TodoContentService {
       // 히스토리 추가
       await this.historyService.addHistory(userId, id);
     } else if (status === 'completed') {
-      message = {
+      result.message = {
         type: 'RECEIVED',
         reward: null
       };
     }
 
-    result.message = message;
     return result;
   }
   async deleteAllTodoContentsByUserId(userId) {
