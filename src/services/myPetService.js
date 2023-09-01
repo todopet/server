@@ -54,7 +54,6 @@ class MyPetService {
     }
 
     const lowestLevelPet = await this.petService.getLowestLevel();
-    console.log(lowestLevelPet, 'lowestLevelPet');
     lowestLevelPet.experience = 0;
 
     const petStorage = await this.myPetModel.create({
@@ -240,7 +239,6 @@ class MyPetService {
           }
         }
       });
-      console.log(promises);
 
       await Promise.all(promises);
     }

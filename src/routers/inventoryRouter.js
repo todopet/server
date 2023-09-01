@@ -13,7 +13,6 @@ inventoryRouter.get(
   asyncHandler(async (req, res, next) => {
     const userId = req.currentUserId;
     const inventoryId = await inventoryService.getInventoryIdByUserId(userId);
-    console.log(inventoryId);
     const result = await inventoryService.getInventoryById(inventoryId);
     res.json(buildResponse(result));
   })
