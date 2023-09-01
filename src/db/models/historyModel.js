@@ -33,12 +33,12 @@ class HistoryModel {
       {
         $group: {
           _id: '$userId', // 사용자 별로 그룹화
-          count: { $sum: 1 } // 데이터 갯수 세기
+          count: { $sum: 1 }, // 데이터 갯수 세기
+          latestCreatedAt: { $max: '$createdAt' } // 최신 createdAt 찾기
         }
       },
       {
-        $sort: { count: -1, createdAt: -1 } // 갯수에 따라 내림차순 정렬 (랭킹 순서), 갯수 같을 시 최근 생성 순서
-        // TODO: 내림차순 정렬하고 최근 생성 순서로도 정렬했는데 조회할때마다 랭킹이 다르게 나오는 현상 있음.
+        $sort: { count: -1, latestCreatedAt: -1 } // 갯수에 따라 내림차순 정렬 (랭킹 순서), 갯수 같을 시 최근 생성 순서
       },
       {
         $project: {
