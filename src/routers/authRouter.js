@@ -95,16 +95,24 @@ authRouter.get(
       if (user) {
         // Check if the user's membershipStatus is 'withdrawn'
         if (user.membershipStatus === 'withdrawn') {
-          return res.status(403).json({
-            message: '탈퇴한 회원입니다. 로그인 할 수 없습니다.'
-          });
+          return res.json(
+            buildResponse({
+              status: 401,
+              result: 'UnAuthorized',
+              reason: '탈퇴한 회원입니다. 로그인 할 수 없습니다..'
+            })
+          );
         }
 
         // Check if the user's membershipStatus is 'active'
         if (user.membershipStatus !== 'active') {
-          return res.status(403).json({
-            message: '비활성화된 회원입니다. 로그인 할 수 없습니다.'
-          });
+          return res.json(
+            buildResponse({
+              status: 401,
+              result: 'UnAuthorized',
+              reason: '회원정지 상태입니다. 로그인 할 수 없습니다..'
+            })
+          );
         }
       } else {
         // If user not found, add the user
