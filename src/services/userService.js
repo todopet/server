@@ -49,12 +49,16 @@ class UserService {
     await this.todoContentService.addContent({
       categoryId: category1._id.toString(),
       todo: '할일1',
-      date: formatDateToString(new Date())
+      date: formatDateToString(
+        new Date(new Date().getTime() + 9 * 60 * 60 * 1000)
+      )
     });
     await this.todoContentService.addContent({
       categoryId: category1._id.toString(),
       todo: '할일2',
-      date: formatDateToString(new Date())
+      date: formatDateToString(
+        new Date(new Date().getTime() + 9 * 60 * 60 * 1000)
+      )
     });
     const category2 = await this.todoCategoryService.addCategory({
       userId: createdNewUser._id,
@@ -63,12 +67,16 @@ class UserService {
     await this.todoContentService.addContent({
       categoryId: category2._id.toString(),
       todo: '할일3',
-      date: formatDateToString(new Date())
+      date: formatDateToString(
+        new Date(new Date().getTime() + 9 * 60 * 60 * 1000)
+      )
     });
     await this.todoContentService.addContent({
       categoryId: category2._id.toString(),
       todo: '할일4',
-      date: formatDateToString(new Date())
+      date: formatDateToString(
+        new Date(new Date().getTime() + 9 * 60 * 60 * 1000)
+      )
     });
 
     return createdNewUser; // 사용자 정보 반환
