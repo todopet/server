@@ -1,7 +1,11 @@
 import { UserModel, HistoryModel } from '../db/models/index.js';
-import { InventoryService, MyPetService } from './index.js';
+import {
+  InventoryService,
+  MyPetService,
+  TodoCategoryService,
+  TodoContentService
+} from './index.js';
 import { setKoreaDay, formatDateToString } from '../utils/common.js';
-import dayjs from 'dayjs';
 
 class UserService {
   constructor() {
@@ -9,6 +13,8 @@ class UserService {
     this.inventoryService = new InventoryService();
     this.myPetService = new MyPetService();
     this.historyModel = new HistoryModel();
+    this.todoCategoryService = new TodoCategoryService();
+    this.todoContentService = new TodoContentService();
   }
   async addUser(userInfo) {
     const newUserInfo = {
@@ -34,6 +40,36 @@ class UserService {
     if (!existingPetStorage) {
       await this.myPetService.addPetStorage(createdNewUser._id, []);
     }
+
+    // 목표 및 할일 추가
+    const category1 = await this.todoCategoryService.addCategory({
+      userId: createdNewUser._id,
+      category: '목표1'
+    });
+    await this.todoContentService.addContent({
+      categoryId: category1._id.toString(),
+      todo: '할일1',
+      date: formatDateToString(new Date())
+    });
+    await this.todoContentService.addContent({
+      categoryId: category1._id.toString(),
+      todo: '할일2',
+      date: formatDateToString(new Date())
+    });
+    const category2 = await this.todoCategoryService.addCategory({
+      userId: createdNewUser._id,
+      category: '목표2'
+    });
+    await this.todoContentService.addContent({
+      categoryId: category2._id.toString(),
+      todo: '할일3',
+      date: formatDateToString(new Date())
+    });
+    await this.todoContentService.addContent({
+      categoryId: category2._id.toString(),
+      todo: '할일4',
+      date: formatDateToString(new Date())
+    });
 
     return createdNewUser; // 사용자 정보 반환
   }
