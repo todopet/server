@@ -106,26 +106,16 @@ class UserService {
       );
     }
 
-    // 한글은 1글자, 영어와 숫자는 0.5글자, 특수문자는 1글자로 계산합니다.
-    const koreanCount = (newNickname.match(/[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/g) || [])
-      .length;
-    const englishCount = (newNickname.match(/[a-zA-Z]/g) || []).length * 0.5;
-    const numberCount = (newNickname.match(/[0-9]/g) || []).length * 0.5;
-    const specialCharCount = (
-      newNickname.match(/[^ㄱ-ㅎ|ㅏ-ㅣ|가-힣|a-zA-Z0-9]/g) || []
-    ).length;
+    const maxCharacterLength = 8; // 모든 글자에 대한 최대 글자 수
 
-    const totalLength =
-      koreanCount + englishCount + numberCount + specialCharCount;
-
-    if (totalLength <= 6) {
+    if (newNickname.length <= maxCharacterLength) {
       const updatedUser = await this.userModel.updateNickname(
         userId,
         newNickname
       );
-      return updatedUser.nickname;
+      return updatedUser;
     } else {
-      return null;
+      throw new Error('닉네임은 8글자 이내로 설정해야 합니다.');
     }
   }
 
