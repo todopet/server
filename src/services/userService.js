@@ -113,9 +113,9 @@ class UserService {
         userId,
         newNickname
       );
-      return updatedUser;
+      return newNickname;
     } else {
-      throw new Error('닉네임은 8글자 이내로 설정해야 합니다.');
+      return null;
     }
   }
 
