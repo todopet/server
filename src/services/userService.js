@@ -92,11 +92,35 @@ class UserService {
     return updatedUser;
   }
   async updateUserNickname(userId, newNickname) {
-    const updatedUser = await this.userModel.updateNickname(
-      userId,
-      newNickname
-    );
-    return updatedUser;
+    if (newNickname.trim() === '') {
+      throw new Error(
+        '닉네임은 한글 6글자 또는 영어 12글자 이하로 설정해야 합니다.'
+      );
+    }
+
+    // 한글은 1글자, 영어와 숫자는 0.5글자, 특수문자는 1글자로 계산합니다.
+    const koreanCount = (newNickname.match(/[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/g) || [])
+      .length;
+    const englishCount = (newNickname.match(/[a-zA-Z]/g) || []).length * 0.5;
+    const numberCount = (newNickname.match(/[0-9]/g) || []).length * 0.5;
+    const specialCharCount = (
+      newNickname.match(/[^ㄱ-ㅎ|ㅏ-ㅣ|가-힣|a-zA-Z0-9]/g) || []
+    ).length;
+
+    const totalLength =
+      koreanCount + englishCount + numberCount + specialCharCount;
+
+    if (totalLength <= 6) {
+      const updatedUser = await this.userModel.updateNickname(
+        userId,
+        newNickname
+      );
+      return updatedUser;
+    } else {
+      throw new Error(
+        '닉네임은 한글 6글자 또는 영어 12글자 이하로 설정해야 합니다.'
+      );
+    }
   }
 
   async WithdrawUserAndToken(userId) {
