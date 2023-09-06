@@ -115,11 +115,9 @@ class UserService {
         userId,
         newNickname
       );
-      return updatedUser;
+      return updatedUser.nickname;
     } else {
-      throw new Error(
-        '닉네임은 한글 6글자 또는 영어 12글자 이하로 설정해야 합니다.'
-      );
+      return null;
     }
   }
 
