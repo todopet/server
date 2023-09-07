@@ -100,20 +100,26 @@ class UserService {
     return updatedUser;
   }
   async updateUserNickname(userId, newNickname) {
-    if (newNickname.trim() === '') {
-      throw new Error(
-        '닉네임은 한글 6글자 또는 영어 12글자 이하로 설정해야 합니다.'
-      );
+    // if (newNickname.trim() === '') {
+    //   throw new Error(
+    //     '닉네임은 한글 6글자 또는 영어 12글자 이하로 설정해야 합니다.'
+    //   );
+    // }
+    const maxCharacterLength = 8; // 모든 글자에 대한 최대 글자 수
+    if (newNickname.trim() !== newNickname) {
+      return null;
     }
 
-    const maxCharacterLength = 8; // 모든 글자에 대한 최대 글자 수
+    if (newNickname.split(' ').length > 1) {
+      return null;
+    }
 
-    if (newNickname.length <= maxCharacterLength) {
+    if (newNickname.length <= maxCharacterLength && newNickname.length > 0) {
       const updatedUser = await this.userModel.updateNickname(
         userId,
         newNickname
       );
-      return newNickname;
+      return updatedUser;
     } else {
       return null;
     }
