@@ -22,12 +22,13 @@ class TodoContentModel {
         return await this.todoContentModel.findById(id).lean();
     }
     async create(content) {
-        const { categoryId, todo } = content;
+        const { categoryId, todo, createdAt } = content;
 
         return (
             await this.todoContentModel.create({
                 categoryId,
-                todo
+                todo,
+                createdAt
             })
         ).toObject();
     }
@@ -50,6 +51,9 @@ class TodoContentModel {
 
     async delete(id) {
         return await this.todoContentModel.findByIdAndDelete(id).lean();
+    }
+    async deleteTodoContentByCategoryId(categoryId) {
+        return await this.todoContentModel.deleteMany({ categoryId });
     }
 }
 
