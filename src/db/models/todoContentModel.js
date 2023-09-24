@@ -11,7 +11,7 @@ class TodoContentModel {
         return await this.todoContentModel
             .find({
                 categoryId: id,
-                createdAt: {
+                todoDate: {
                     $gte: start,
                     $lte: end
                 }
@@ -22,25 +22,25 @@ class TodoContentModel {
         return await this.todoContentModel.findById(id).lean();
     }
     async create(content) {
-        const { categoryId, todo, createdAt } = content;
+        const { categoryId, todo, todoDate } = content;
 
         return (
             await this.todoContentModel.create({
                 categoryId,
                 todo,
-                createdAt
+                todoDate
             })
         ).toObject();
     }
     async update(content) {
-        const { id, todo, status } = content;
-
+        const { id, todo, status, todoDate } = content;
         return await this.todoContentModel
             .findByIdAndUpdate(
                 id,
                 {
                     todo,
-                    status
+                    status,
+                    todoDate
                 },
                 {
                     new: true
