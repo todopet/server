@@ -7,6 +7,7 @@ import todoContentSchema from "./todoContentSchema.js";
 import userSchema from "./userSchema.js";
 import historySchema from "./historySchema.js";
 import achieveSchema from "./achieveSchema.js";
+import badgeSchema from "./badgeSchema.js";
 
 export {
     inventorySchema,
@@ -17,5 +18,6 @@ export {
     todoContentSchema,
     userSchema,
     historySchema,
-    achieveSchema
+    achieveSchema,
+    badgeSchema
 };

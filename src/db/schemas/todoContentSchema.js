@@ -14,6 +14,10 @@ const todoContentSchema = new Schema(
             type: String,
             enum: ['unchecked', 'reverted', 'completed'],
             default: 'unchecked'
+        },
+        todoDate: {
+            type: Date,
+            required: true
         }
     },
     {

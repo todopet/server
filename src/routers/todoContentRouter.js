@@ -54,12 +54,14 @@ todoContentRouter.patch(
   asyncHandler(async (req, res, next) => {
     const userId = req.currentUserId;
     const { id } = req.params;
-    const { todo, status } = req.body;
+    const { todo, status, date } = req.body;
+    console.log(todo, status, date);
     const response = await todoContentService.updateContent({
       id,
       userId,
       todo,
-      status
+      status,
+      date
     });
 
     return response;

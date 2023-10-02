@@ -10,9 +10,10 @@ const historyService = new HistoryService();
 
 // 랭킹 순위 전달 받기.
 userRouter.get(
-  '/rank',
+  '/rank/:count',
   asyncHandler(async (req, res, next) => {
-    const ranking = await historyService.getRanking();
+    const { count } = req.params;
+    const ranking = await historyService.getRanking(count);
     return ranking;
   })
 );
