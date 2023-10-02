@@ -26,7 +26,7 @@ class HistoryService {
     return await this.historyModel.deleteMany(id);
   }
 
-  async getRanking() {
+  async getRanking(count) {
     // 현재 시간
     const currentDate = dayjs();
     // 입력 날짜의 요일 가져오기
@@ -45,7 +45,8 @@ class HistoryService {
     // 랭킹 구하기 (유저아이디, 투두 해결 갯수)
     const ranking = await this.historyModel.findRanking(
       previousSunday,
-      nextSaturday
+      nextSaturday,
+      +count
     );
     // 유저 아이디 배열 만들기
     const userIds = ranking.map((item) => item.userId);

@@ -20,7 +20,7 @@ class HistoryModel {
     return (await History.create({ userId, contentId })).toObject();
   }
 
-  async findRanking(start, end) {
+  async findRanking(start, end, count) {
     return await History.aggregate([
       {
         $match: {
@@ -48,7 +48,7 @@ class HistoryModel {
         }
       },
       {
-        $limit: 10 // 상위 10개 데이터만 가져오기TODO: 매개변수로 받아서 상위 몇개 받아올것인지 결정할 수 있어야 한다. 추후 진행
+        $limit: count // 상위 10개 데이터만 가져오기TODO: 매개변수로 받아서 상위 몇개 받아올것인지 결정할 수 있어야 한다. 추후 진행
       }
     ]);
   }
