@@ -7,8 +7,13 @@ const userAuthorization = async (req, res, next) => {
   const serverToken = req.headers.token;
   const clientToken = req.cookies.token;
   // const userToken = auth?.split(' ')[1];
+  console.log("===================req======================");
   console.log(req);
+  console.log("===================req======================");
+  console.log("===================req.headers======================");
   console.log(req.headers);
+  console.log("===================req.headers======================");
+  console.log(req.cookies);
   if (
     (!serverToken || serverToken === 'null') &&
     (!clientToken || clientToken === 'null')
