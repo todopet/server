@@ -31,15 +31,15 @@ const userAuthorization = async (req, res, next) => {
   try {
     const { userId } = jwt.verify(serverToken ?? clientToken);
     // ----
-    return res.json(
-      buildResponse({
-        status: 401,
-        result: 'Unauthorized',
-        reason: '로그인한 유저만 사용할 수 있는 서비스입니다.',
-        serverToken123: serverToken,
-        userIdInfo: userId,
-      })
-    );
+    // return res.json(
+    //   buildResponse({
+    //     status: 401,
+    //     result: 'Unauthorized',
+    //     reason: '로그인한 유저만 사용할 수 있는 서비스입니다.',
+    //     serverToken123: serverToken,
+    //     userIdInfo: userId,
+    //   })
+    // );
     // ----
     req.currentUserId = userId;
 
