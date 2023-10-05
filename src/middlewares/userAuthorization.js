@@ -17,8 +17,10 @@ const userAuthorization = async (req, res, next) => {
         status: 401,
         result: 'Unauthorized',
         reason: '로그인한 유저만 사용할 수 있는 서비스입니다.',
+        aaa: 'aaaa',
         serverToken12: serverToken,
         clientToken12: clientToken,
+        bbb: 'bbbb',
       })
     );
   }
