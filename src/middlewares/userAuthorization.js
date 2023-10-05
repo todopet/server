@@ -7,12 +7,6 @@ const userAuthorization = async (req, res, next) => {
   const serverToken = req.headers.token;
   const clientToken = req.cookies.token;
   // const userToken = auth?.split(' ')[1];
-  return res.json(
-      buildResponse({
-        serverToken123: serverToken,
-        clientToken123: clientToken,
-      })
-    );
   
   if (
     (!serverToken || serverToken === 'null') &&
@@ -31,7 +25,17 @@ const userAuthorization = async (req, res, next) => {
 
   try {
     const { userId } = jwt.verify(serverToken ?? clientToken);
-
+    // ----
+    return res.json(
+      buildResponse({
+        status: 401,
+        result: 'Unauthorized',
+        reason: '로그인한 유저만 사용할 수 있는 서비스입니다.',
+        serverToken123: serverToken,
+        userIdInfo: userId,
+      })
+    );
+    // ----
     req.currentUserId = userId;
 
     next();
