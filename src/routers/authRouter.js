@@ -118,7 +118,7 @@ authRouter.get(
       console.log("=========================token=========================");
       console.log(token);
       console.log("=========================token=========================");
-      res.cookie('token', token);
+      res.cookie('token', token, { sameSite: 'none', secure: true });
       console.log(res);
       console.log("=========================res===========================");
       // TODO: 환경변수로라도.. 관리
@@ -165,7 +165,7 @@ authRouter.get(
     // 여기서 user._id를 문자열로 변환하여 전달
     const token = jwt.sign(user._id.toString()); // 토큰 발급
 
-    res.cookie('token', token); // 클라이언트에게 토큰 전달
+    res.cookie('token', token, { sameSite: 'none', secure: true }); // 클라이언트에게 토큰 전달
     res.redirect('/api/v1'); // 루트 페이지로 리다이렉트
   })
 );
