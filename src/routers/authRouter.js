@@ -115,14 +115,7 @@ authRouter.get(
         user = await userService.addUser(resp2.data);
       }
       const token = jwt.sign(user._id);
-      console.log("=========================token=========================");
-      console.log(token);
-      console.log("=========================token=========================");
       res.cookie('token', token, { sameSite: 'none', secure: true });
-      console.log(res);
-      console.log("=========================res===========================");
-      // TODO: 환경변수로라도.. 관리
-      // 배포환경에서는 /todo 만 놓으면 됨 origin이 같기 때문.
       // res.redirect("http://localhost:3000/todo");
       res.redirect(`${config.ROOT}/todo`); // http://localhost:3001/api/v1
       await session.commitTransaction();
