@@ -40,7 +40,7 @@ app.use(function (req, res, next) {
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH'); // 필요한 HTTP 메서드 추가
     res.header('Access-Control-Allow-Credentials', 'true'); // credentials 허용
 });
-// app.use(cors(corsOptions));
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
