@@ -114,7 +114,6 @@ authRouter.get(
         // If user not found, add the user
         user = await userService.addUser(resp2.data);
       }
-      return res.json(user);
       const token = jwt.sign(user._id);
       res.cookie('token', token);
       // TODO: 환경변수로라도.. 관리
