@@ -5,29 +5,29 @@ import path from 'path';
 import mongoose from 'mongoose';
 import cookieParser from 'cookie-parser';
 import axios from 'axios';
-import { v1 } from './src/routers/index.js';
-import authRouter from './src/routers/authRouter.js';
-import userAuthorization from './src/middlewares/userAuthorization.js';
+import { v1 } from '../src/routers/index.js';
+import authRouter from '../src/routers/authRouter.js';
+import userAuthorization from '../src/middlewares/userAuthorization.js';
 dotenv.config();
 
 const app = express();
 const config = {
-    PORT: process.env.PORT,
-    DB_URL: process.env.DB_URL
+  PORT: process.env.PORT,
+  DB_URL: process.env.DB_URL
 };
 
 mongoose.connect(config.DB_URL, {
-    dbName: 'Todo-Tamers'
+  dbName: 'Todo-Tamers'
 });
 
 mongoose.connection.on('connected', () =>
-    console.log('정상적으로 MongoDB 서버에 연결되었습니다. ')
+  console.log('정상적으로 MongoDB 서버에 연결되었습니다. ')
 );
 
 const corsOptions = {
-    origin: 'http://localhost:3000',
-    optionsSuccessStatus: 200,
-    credentials: true
+  origin: 'http://localhost:3000',
+  optionsSuccessStatus: 200,
+  credentials: true
 };
 //CORS 에러방지
 // app.use(function (req, res, next) {
@@ -51,7 +51,7 @@ app.use('/api/v1', authRouter);
 app.use('/api/v1', userAuthorization, v1);
 
 app.listen(config.PORT, function () {
-    console.log(`서버가 ${config.PORT}에서 실행 중....`);
+  console.log(`서버가 ${config.PORT}에서 실행 중....`);
 });
 
 export default app;
