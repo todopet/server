@@ -26,7 +26,7 @@ mongoose.connection.on('connected', () =>
 
 const corsOptions = {
   origin: 'https://todopet.vercel.app',
-  //   origin: 'http://localhost:3000',
+  // origin: 'http://localhost:3000',
   optionsSuccessStatus: 200,
   credentials: true
 };
@@ -56,3 +56,4 @@ app.listen(config.PORT, function () {
 });
 
 export default app;
+// export { app };
