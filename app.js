@@ -1,57 +1,73 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
-import path from 'path';
 import mongoose from 'mongoose';
 import cookieParser from 'cookie-parser';
-import axios from 'axios';
 import { v1 } from './src/routers/index.js';
 import authRouter from './src/routers/authRouter.js';
 import userAuthorization from './src/middlewares/userAuthorization.js';
+
 dotenv.config();
 
 const app = express();
+
 const config = {
-    PORT: process.env.PORT,
-    DB_URL: process.env.DB_URL
+  PORT: process.env.PORT || 3001,
+  DB_URL: process.env.DB_URL
 };
 
+// -------------------- MongoDB 연결 --------------------
 mongoose.connect(config.DB_URL, {
-    dbName: 'Todo-Tamers'
+  dbName: 'Todo-Tamers'
 });
 
 mongoose.connection.on('connected', () =>
-    console.log('정상적으로 MongoDB 서버에 연결되었습니다. ')
+  console.log('정상적으로 MongoDB 서버에 연결되었습니다.')
 );
 
+// -------------------- CORS 설정 --------------------
+const allowedOrigins = [
+  'http://localhost:3000', // 로컬 프론트
+  'https://todopetclient.vercel.app' // 배포된 프론트
+];
+
 const corsOptions = {
-    origin: 'http://localhost:3000',
-    optionsSuccessStatus: 200,
-    credentials: true
+  origin(origin, callback) {
+    // Postman 같은 non-browser 요청(origin 없음)은 그냥 통과
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    // 허용되지 않은 origin
+    return callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true, // 쿠키 사용
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  optionsSuccessStatus: 200
 };
-//CORS 에러방지
-// app.use(function (req, res, next) {
-//     res.header('Access-Control-Allow-Origin', 'http://localhost:3000'); // 클라이언트 도메인
-//     res.header(
-//         'Access-Control-Allow-Headers',
-//         'Origin, X-Requested-With, Content-Type, Accept'
-//     );
-//     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH'); // 필요한 HTTP 메서드 추가
-//     res.header('Access-Control-Allow-Credentials', 'true'); // credentials 허용
-// });
+
 app.use(cors(corsOptions));
+// preflight(OPTIONS) 요청도 cors 적용
+app.options('*', cors(corsOptions));
+
+// -------------------- 공통 미들웨어 --------------------
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
 
-//정적 파일 제공
-//app.use(express.static(path.join(__dirname, "public")));
+// 정적 파일이 필요하면 주석 해제
+// app.use(express.static(path.join(__dirname, "public")));
 
-// version 1의 api router 등록
+// -------------------- 라우터 등록 --------------------
 app.use('/api/v1', authRouter);
 app.use('/api/v1', userAuthorization, v1);
 
+// -------------------- 서버 시작 --------------------
 app.listen(config.PORT, function () {
-    console.log(`서버가 ${config.PORT}에서 실행 중....`);
+  console.log(`서버가 ${config.PORT}에서 실행 중....`);
 });
 
 export default app;
