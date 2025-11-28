@@ -71,81 +71,72 @@ authRouter.get('/login', (req, res) => {
   // res.redirect(url);
 });
 
-authRouter.get(
-  '/login/redirect',
-  asyncHandler(async (req, res, next) => {
-    const session = await mongoose.startSession();
-    session.startTransaction();
+authRouter.get('/login/redirect', async (req, res, next) => {
+  try {
+    const { code } = req.query;
+    console.log('[LOGIN REDIRECT] code =', code);
+    console.log('[LOGIN REDIRECT] config =', {
+      ROOT: config.ROOT,
+      GOOGLE_CLIENT_ID: config.GOOGLE_CLIENT_ID,
+      GOOGLE_LOGIN_REDIRECT_URI: config.GOOGLE_LOGIN_REDIRECT_URI
+    });
 
-    try {
-      const { code } = req.query;
-      console.log('[LOGIN REDIRECT] code =', code);
-      console.log('[LOGIN REDIRECT] config =', {
-        ROOT: config.ROOT,
-        GOOGLE_CLIENT_ID: config.GOOGLE_CLIENT_ID,
-        GOOGLE_LOGIN_REDIRECT_URI: config.GOOGLE_LOGIN_REDIRECT_URI
-      });
+    // Google token endpoint requires x-www-form-urlencoded
+    const tokenParams = new URLSearchParams({
+      code,
+      client_id: String(config.GOOGLE_CLIENT_ID),
+      client_secret: String(config.GOOGLE_CLIENT_SECRET),
+      redirect_uri: String(config.GOOGLE_LOGIN_REDIRECT_URI),
+      grant_type: 'authorization_code'
+    });
 
-      const resp = await axios.post(config.GOOGLE_TOKEN_URL, {
-        code,
-        client_id: config.GOOGLE_CLIENT_ID,
-        client_secret: config.GOOGLE_CLIENT_SECRET,
-        redirect_uri: config.GOOGLE_LOGIN_REDIRECT_URI,
-        grant_type: 'authorization_code'
-      });
+    const resp = await axios.post(String(config.GOOGLE_TOKEN_URL), tokenParams, {
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+    });
 
-      const resp2 = await axios.get(config.GOOGLE_USERINFO_URL, {
-        headers: {
-          Authorization: `Bearer ${resp.data.access_token}`
-        }
-      });
+    const resp2 = await axios.get(String(config.GOOGLE_USERINFO_URL), {
+      headers: {
+        Authorization: `Bearer ${resp.data.access_token}`
+      }
+    });
 
-      const userService = new UserService();
-      let user = await userService.findByGoogleId(resp2.data.id);
+    const userService = new UserService();
+    let user = await userService.findByGoogleId(resp2.data.id);
 
-      if (user) {
-        // 탈퇴/정지 처리
-        if (user.membershipStatus === 'withdrawn') {
-          const reason = encodeURIComponent('탈퇴한 회원입니다.');
-          await session.abortTransaction();
-          return res.redirect(
-            `${config.ROOT}/#status=401&result=UnAuthorized&reason=${reason}`
-          );
-        }
-
-        if (user.membershipStatus !== 'active') {
-          const reason = encodeURIComponent('정지된 회원입니다.');
-          await session.abortTransaction();
-          return res.redirect(
-            `${config.ROOT}/#status=401&result=UnAuthorized&reason=${reason}`
-          );
-        }
-      } else {
-        user = await userService.addUser(resp2.data);
+    if (user) {
+      // 탈퇴/정지 처리
+      if (user.membershipStatus === 'withdrawn') {
+        const reason = encodeURIComponent('탈퇴한 회원입니다.');
+        return res.redirect(
+          `${config.ROOT}/#status=401&result=UnAuthorized&reason=${reason}`
+        );
       }
 
-      const token = jwt.sign(user._id);
-      // prod 에서는 secure / sameSite 설정도 같이 넣는 게 좋습니다.
-      res.cookie('token', token, {
-        httpOnly: true,
-        secure: true, // https 환경
-        sameSite: 'none' // client.vercel.app -> server.vercel.app 크로스 사이트
-      });
-
-      await session.commitTransaction();
-
-      console.log('[LOGIN REDIRECT] redirect to', `${config.ROOT}/todo`);
-      return res.redirect(`${config.ROOT}/todo`);
-    } catch (error) {
-      console.error('[LOGIN REDIRECT ERROR]', error);
-      await session.abortTransaction();
-      // 에러를 다음 미들웨어로 넘겨서 500 응답이라도 가게 함
-      return next(error);
-    } finally {
-      session.endSession();
+      if (user.membershipStatus !== 'active') {
+        const reason = encodeURIComponent('정지된 회원입니다.');
+        return res.redirect(
+          `${config.ROOT}/#status=401&result=UnAuthorized&reason=${reason}`
+        );
+      }
+    } else {
+      user = await userService.addUser(resp2.data);
     }
-  })
-);
+
+    const token = jwt.sign(user._id);
+    // prod 에서는 secure / sameSite 설정도 같이 넣는 게 좋습니다.
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: true, // https 환경
+      sameSite: 'none' // client.vercel.app -> server.vercel.app 크로스 사이트
+    });
+
+    console.log('[LOGIN REDIRECT] redirect to', `${config.ROOT}/todo`);
+    res.redirect(`${config.ROOT}/todo`);
+  } catch (error) {
+    console.error('[LOGIN REDIRECT ERROR]', error);
+    return next(error);
+  }
+});
 
 //회원가입
 authRouter.get('/signup', (req, res) => {
@@ -155,19 +146,21 @@ authRouter.get('/signup', (req, res) => {
 });
 
 //구글에 토큰 요청 및 회원 등록
-authRouter.get(
-  '/signup/redirect',
-  asyncHandler(async (req, res) => {
+authRouter.get('/signup/redirect', async (req, res, next) => {
+  try {
     const { code } = req.query;
 
-    const resp = await axios.post(config.GOOGLE_TOKEN_URL, {
+    const tokenParams = new URLSearchParams({
       code,
-      client_id: config.GOOGLE_CLIENT_ID,
-      client_secret: config.GOOGLE_CLIENT_SECRET,
-      redirect_uri: config.GOOGLE_SIGNUP_REDIRECT_URI,
+      client_id: String(config.GOOGLE_CLIENT_ID),
+      client_secret: String(config.GOOGLE_CLIENT_SECRET),
+      redirect_uri: String(config.GOOGLE_SIGNUP_REDIRECT_URI),
       grant_type: 'authorization_code'
     });
-    const resp2 = await axios.get(config.GOOGLE_USERINFO_URL, {
+    const resp = await axios.post(String(config.GOOGLE_TOKEN_URL), tokenParams, {
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+    });
+    const resp2 = await axios.get(String(config.GOOGLE_USERINFO_URL), {
       headers: {
         Authorization: `Bearer ${resp.data.access_token}`
       }
@@ -175,13 +168,19 @@ authRouter.get(
 
     const userService = new UserService();
     const user = await userService.addUser(resp2.data); // 회원 정보 추가 및 가져오기
-    // 여기서 user._id를 문자열로 변환하여 전달
     const token = jwt.sign(user._id.toString()); // 토큰 발급
 
-    res.cookie('token', token); // 클라이언트에게 토큰 전달
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none'
+    });
     res.redirect('/api/v1'); // 루트 페이지로 리다이렉트
-  })
-);
+  } catch (error) {
+    console.error('[SIGNUP REDIRECT ERROR]', error);
+    return next(error);
+  }
+});
 
 authRouter.post('/logout', (req, res) => {
   res.clearCookie('token'); // 토큰 쿠키 삭제
