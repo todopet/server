@@ -73,12 +73,19 @@ authRouter.get('/login', (req, res) => {
 
 authRouter.get(
   '/login/redirect',
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req, res, next) => {
     const session = await mongoose.startSession();
     session.startTransaction();
 
     try {
       const { code } = req.query;
+      console.log('[LOGIN REDIRECT] code =', code);
+      console.log('[LOGIN REDIRECT] config =', {
+        ROOT: config.ROOT,
+        GOOGLE_CLIENT_ID: config.GOOGLE_CLIENT_ID,
+        GOOGLE_LOGIN_REDIRECT_URI: config.GOOGLE_LOGIN_REDIRECT_URI
+      });
+
       const resp = await axios.post(config.GOOGLE_TOKEN_URL, {
         code,
         client_id: config.GOOGLE_CLIENT_ID,
@@ -86,44 +93,55 @@ authRouter.get(
         redirect_uri: config.GOOGLE_LOGIN_REDIRECT_URI,
         grant_type: 'authorization_code'
       });
+
       const resp2 = await axios.get(config.GOOGLE_USERINFO_URL, {
         headers: {
           Authorization: `Bearer ${resp.data.access_token}`
         }
       });
+
       const userService = new UserService();
       let user = await userService.findByGoogleId(resp2.data.id);
+
       if (user) {
-        // Check if the user's membershipStatus is 'withdrawn'
+        // 탈퇴/정지 처리
         if (user.membershipStatus === 'withdrawn') {
-          // encodeUrl
           const reason = encodeURIComponent('탈퇴한 회원입니다.');
-          res.redirect(
+          await session.abortTransaction();
+          return res.redirect(
             `${config.ROOT}/#status=401&result=UnAuthorized&reason=${reason}`
           );
         }
 
-        // Check if the user's membershipStatus is 'active'
         if (user.membershipStatus !== 'active') {
           const reason = encodeURIComponent('정지된 회원입니다.');
-          res.redirect(
+          await session.abortTransaction();
+          return res.redirect(
             `${config.ROOT}/#status=401&result=UnAuthorized&reason=${reason}`
           );
         }
       } else {
-        // If user not found, add the user
         user = await userService.addUser(resp2.data);
       }
+
       const token = jwt.sign(user._id);
-      res.cookie('token', token);
-      // TODO: 환경변수로라도.. 관리
-      // 배포환경에서는 /todo 만 놓으면 됨 origin이 같기 때문.
-      // http://localhost:3000/todo
-      res.redirect(`${config.ROOT}/todo`); // http://localhost:3001/api/v1
+      // prod 에서는 secure / sameSite 설정도 같이 넣는 게 좋습니다.
+      res.cookie('token', token, {
+        httpOnly: true,
+        secure: true, // https 환경
+        sameSite: 'none' // client.vercel.app -> server.vercel.app 크로스 사이트
+      });
+
       await session.commitTransaction();
-      session.endSession();
+
+      console.log('[LOGIN REDIRECT] redirect to', `${config.ROOT}/todo`);
+      return res.redirect(`${config.ROOT}/todo`);
     } catch (error) {
+      console.error('[LOGIN REDIRECT ERROR]', error);
       await session.abortTransaction();
+      // 에러를 다음 미들웨어로 넘겨서 500 응답이라도 가게 함
+      return next(error);
+    } finally {
       session.endSession();
     }
   })
