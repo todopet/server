@@ -90,9 +90,13 @@ authRouter.get('/login/redirect', async (req, res, next) => {
       grant_type: 'authorization_code'
     });
 
-    const resp = await axios.post(String(config.GOOGLE_TOKEN_URL), tokenParams, {
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-    });
+    const resp = await axios.post(
+      String(config.GOOGLE_TOKEN_URL),
+      tokenParams,
+      {
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+      }
+    );
 
     const resp2 = await axios.get(String(config.GOOGLE_USERINFO_URL), {
       headers: {
@@ -157,9 +161,13 @@ authRouter.get('/signup/redirect', async (req, res, next) => {
       redirect_uri: String(config.GOOGLE_SIGNUP_REDIRECT_URI),
       grant_type: 'authorization_code'
     });
-    const resp = await axios.post(String(config.GOOGLE_TOKEN_URL), tokenParams, {
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-    });
+    const resp = await axios.post(
+      String(config.GOOGLE_TOKEN_URL),
+      tokenParams,
+      {
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+      }
+    );
     const resp2 = await axios.get(String(config.GOOGLE_USERINFO_URL), {
       headers: {
         Authorization: `Bearer ${resp.data.access_token}`
@@ -184,7 +192,7 @@ authRouter.get('/signup/redirect', async (req, res, next) => {
 
 authRouter.post('/logout', (req, res) => {
   res.clearCookie('token'); // 토큰 쿠키 삭제
-  res.status(200).json({ message: '로그아웃 처리 완료' });
+  res.status(200).json({ status: 200, message: '로그아웃 처리 완료' });
   // res.redirect('/api/v1'); // 로그아웃 후 루트 페이지로 리다이렉트
 });
 
