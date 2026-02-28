@@ -1,12 +1,5 @@
 import { Router } from 'express';
-import {
-  UserService,
-  InventoryService,
-  MyPetService,
-  HistoryService,
-  TodoCategoryService,
-  TodoContentService
-} from '../services/index.js';
+import { UserService } from '../services/index.js';
 
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
@@ -16,6 +9,7 @@ import userAuthorization from '../middlewares/userAuthorization.js';
 import jwt from '../utils/jwt.js';
 import mongoose from 'mongoose';
 import { buildResponse } from '../misc/utils.js';
+import AppError from '../misc/AppError.js';
 
 dotenv.config();
 const authRouter = Router();
@@ -200,34 +194,74 @@ authRouter.post('/logout', (req, res) => {
 authRouter.post(
   '/withdraw',
   userAuthorization,
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req, res, next) => {
     const userId = req.currentUserId;
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      throw new AppError('ValidationError', 400, '유효하지 않은 사용자입니다.');
+    }
 
-    const inventoryService = new InventoryService();
-    const myPetService = new MyPetService();
-    const userService = new UserService();
-    const historyService = new HistoryService();
-    const todoCategoryService = new TodoCategoryService();
-    const todoContentService = new TodoContentService();
+    const objectUserId = new mongoose.Types.ObjectId(userId);
+    const session = await mongoose.startSession();
 
     try {
-      // 사용자의 인벤토리, 펫보관함, 히스토리 삭제 및 탈퇴처리
-      await historyService.deleteAllHistoryByUserId(userId);
-      await inventoryService.deleteInventoryByUserId(userId);
-      await myPetService.deletePetStorageByUserId(userId);
-      await todoContentService.deleteAllTodoContentsByUserId(userId);
-      await todoCategoryService.deleteAllTodoCategoiesByUserId(userId);
+      await session.withTransaction(async () => {
+        const todoCategories = await mongoose.connection
+          .collection('todoCategories')
+          .find({ userId: objectUserId }, { projection: { _id: 1 }, session })
+          .toArray();
 
-      await userService.withdrawUser(userId);
+        const categoryIds = todoCategories.map((category) => category._id);
+
+        if (categoryIds.length > 0) {
+          await mongoose.connection.collection('todoContents').deleteMany(
+            { categoryId: { $in: categoryIds } },
+            { session }
+          );
+        }
+
+        await Promise.all([
+          mongoose.connection
+            .collection('histories')
+            .deleteMany({ userId: objectUserId }, { session }),
+          mongoose.connection
+            .collection('inventories')
+            .deleteMany({ userId: objectUserId }, { session }),
+          mongoose.connection
+            .collection('myPets')
+            .deleteMany({ userId: objectUserId }, { session }),
+          mongoose.connection
+            .collection('todoCategories')
+            .deleteMany({ userId: objectUserId }, { session })
+        ]);
+
+        const withdrawResult = await mongoose.connection
+          .collection('users')
+          .updateOne(
+            { _id: objectUserId },
+            { $set: { membershipStatus: 'withdrawn' } },
+            { session }
+          );
+
+        if (withdrawResult.matchedCount === 0) {
+          throw new AppError(
+            'NotFoundError',
+            404,
+            '회원 정보를 찾을 수 없습니다.'
+          );
+        }
+      });
+
       res.clearCookie('token', {
         httpOnly: true,
         secure: true,
         sameSite: 'none'
       });
 
-      res.status(200).json({ message: '탈퇴 처리 완료' });
+      return res.status(200).json(buildResponse({ message: '탈퇴 처리 완료' }));
     } catch (error) {
-      res.status(500).json({ error: '사용자 탈퇴 실패' });
+      return next(error);
+    } finally {
+      await session.endSession();
     }
   })
 );
