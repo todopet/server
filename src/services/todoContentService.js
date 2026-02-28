@@ -25,7 +25,7 @@ class TodoContentService {
     // 사용자의 각 카테고리에 대해 비동기 작업을 병렬로 시작
     const promises = categories.map(async (category) => {
       const todos = await todoContentModel.findByCategoryId(
-        category._id.toString(),
+        category._id,
         startDate,
         endDate
       );
@@ -113,7 +113,7 @@ class TodoContentService {
     if (categoryId) {
       for (let i = 0; i < categoryId.length; i++) {
         await todoContentModel.deleteTodoContentByCategoryId(
-          categoryId[i]._id.toString()
+          categoryId[i]._id
         );
       }
     }

@@ -47,14 +47,14 @@ class UserService {
       category: '목표1'
     });
     await this.todoContentService.addContent({
-      categoryId: category1._id.toString(),
+      categoryId: category1._id,
       todo: '할일1',
       date: formatDateToString(
         new Date(new Date().getTime() + 9 * 60 * 60 * 1000)
       )
     });
     await this.todoContentService.addContent({
-      categoryId: category1._id.toString(),
+      categoryId: category1._id,
       todo: '할일2',
       date: formatDateToString(
         new Date(new Date().getTime() + 9 * 60 * 60 * 1000)
@@ -65,14 +65,14 @@ class UserService {
       category: '목표2'
     });
     await this.todoContentService.addContent({
-      categoryId: category2._id.toString(),
+      categoryId: category2._id,
       todo: '할일3',
       date: formatDateToString(
         new Date(new Date().getTime() + 9 * 60 * 60 * 1000)
       )
     });
     await this.todoContentService.addContent({
-      categoryId: category2._id.toString(),
+      categoryId: category2._id,
       todo: '할일4',
       date: formatDateToString(
         new Date(new Date().getTime() + 9 * 60 * 60 * 1000)
