@@ -150,8 +150,19 @@ class MyPetService {
     }
 
     Object.assign(petToUpdate.pet, updatedFields);
+    const updatedPetStorage = await this.myPetModel.update(
+      petStorageId,
+      petStorage
+    );
+    const updatedPet = updatedPetStorage.pets.find(
+      (pet) => pet._id.toString() === petId.toString()
+    );
 
-    return petToUpdate;
+    if (!updatedPet) {
+      throw new Error('Updated pet not found in petStorage');
+    }
+
+    return updatedPet;
   }
 
   async updatePetWithItemEffect(
