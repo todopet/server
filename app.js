@@ -18,14 +18,22 @@ const config = {
   DB_URL: process.env.DB_URL
 };
 
-// -------------------- MongoDB 연결 --------------------
-mongoose.connect(config.DB_URL, {
-  dbName: 'Todo-Tamers'
+let isShuttingDown = false;
+
+mongoose.connection.on('connected', () => {
+  console.log('정상적으로 MongoDB 서버에 연결되었습니다.');
 });
 
-mongoose.connection.on('connected', () =>
-  console.log('정상적으로 MongoDB 서버에 연결되었습니다.')
-);
+mongoose.connection.on('error', (err) => {
+  console.error('[MongoDB] connection error:', err);
+});
+
+mongoose.connection.on('disconnected', () => {
+  console.error('[MongoDB] disconnected.');
+  if (!isShuttingDown) {
+    process.exit(1);
+  }
+});
 
 // -------------------- CORS 설정 --------------------
 const allowedOrigins = [
@@ -100,10 +108,44 @@ app.use((err, req, res, next) => {
 
   return res.status(statusCode).json(buildResponse(null, error));
 });
+const connectDatabase = async () => {
+  try {
+    await mongoose.connect(config.DB_URL, {
+      dbName: 'Todo-Tamers'
+    });
+  } catch (err) {
+    console.error('[MongoDB] initial connect failed:', err);
+    process.exit(1);
+  }
+};
 
-// -------------------- 서버 시작 --------------------
-app.listen(config.PORT, function () {
-  console.log(`서버가 ${config.PORT}에서 실행 중....`);
-});
+const startServer = async () => {
+  await connectDatabase();
+
+  const server = app.listen(config.PORT, () => {
+    console.log(`서버가 ${config.PORT}에서 실행 중....`);
+  });
+
+  const gracefulShutdown = async (signal) => {
+    if (isShuttingDown) return;
+    isShuttingDown = true;
+    console.log(`[Server] ${signal} received. shutting down...`);
+
+    server.close(async () => {
+      try {
+        await mongoose.connection.close(false);
+        process.exit(0);
+      } catch (err) {
+        console.error('[MongoDB] close failed:', err);
+        process.exit(1);
+      }
+    });
+  };
+
+  process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+  process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+};
+
+startServer();
 
 export default app;
