@@ -336,7 +336,7 @@ class MyPetService {
 
   //회원 탈퇴시 펫보관함 삭제
   async deletePetStorageByUserId(userId) {
-    const petStorage = await this.getMyPet(userId);
+    const petStorage = await this.myPetModel.findByUserId(userId);
     if (petStorage) {
       await this.myPetModel.delete(petStorage._id);
     }
