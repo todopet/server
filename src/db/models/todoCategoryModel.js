@@ -20,12 +20,26 @@ class TodoCategoryModel {
         return (await TodoCategory.create({ userId, category })).toObject();
     }
     async update(id, category) {
-        return await TodoCategory.findByIdAndUpdate(id, {
-            category
-        }).lean();
+        return await TodoCategory.findByIdAndUpdate(
+            id,
+            {
+                category
+            },
+            {
+                new: true,
+                lean: true
+            }
+        );
     }
     async updateEnd(id) {
-        return await TodoCategory.findByIdAndUpdate(id, { ended: true });
+        return await TodoCategory.findByIdAndUpdate(
+            id,
+            { ended: true },
+            {
+                new: true,
+                lean: true
+            }
+        );
     }
     async delete(id) {
         return await TodoCategory.findByIdAndDelete(id).lean();
