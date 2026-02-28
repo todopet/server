@@ -71,6 +71,34 @@ app.use(cookieParser());
 // 정적 파일이 필요하면 주석 해제
 // app.use(express.static(path.join(__dirname, "public")));
 
+app.get('/health', (req, res) => {
+  const dbStateLabel = ['disconnected', 'connected', 'connecting', 'disconnecting'];
+  const dbState = dbStateLabel[mongoose.connection.readyState] ?? 'unknown';
+
+  return res.status(200).json(
+    buildResponse({
+      status: 'ok',
+      uptime: process.uptime(),
+      timestamp: new Date().toISOString(),
+      dbState
+    })
+  );
+});
+
+app.get('/api/v1/health', (req, res) => {
+  const dbStateLabel = ['disconnected', 'connected', 'connecting', 'disconnecting'];
+  const dbState = dbStateLabel[mongoose.connection.readyState] ?? 'unknown';
+
+  return res.status(200).json(
+    buildResponse({
+      status: 'ok',
+      uptime: process.uptime(),
+      timestamp: new Date().toISOString(),
+      dbState
+    })
+  );
+});
+
 // -------------------- 라우터 등록 --------------------
 app.use('/api/v1', authRouter);
 app.use('/api/v1', userAuthorization, v1);
