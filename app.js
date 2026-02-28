@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import cookieParser from 'cookie-parser';
+import { pathToFileURL } from 'url';
 import { v1 } from './src/routers/index.js';
 import authRouter from './src/routers/authRouter.js';
 import userAuthorization from './src/middlewares/userAuthorization.js';
@@ -19,6 +20,8 @@ const config = {
 };
 
 let isShuttingDown = false;
+const isServerlessRuntime = Boolean(process.env.VERCEL);
+let dbConnectPromise = null;
 
 mongoose.connection.on('connected', () => {
   console.log('정상적으로 MongoDB 서버에 연결되었습니다.');
@@ -30,7 +33,7 @@ mongoose.connection.on('error', (err) => {
 
 mongoose.connection.on('disconnected', () => {
   console.error('[MongoDB] disconnected.');
-  if (!isShuttingDown) {
+  if (!isShuttingDown && !isServerlessRuntime) {
     process.exit(1);
   }
 });
@@ -71,32 +74,24 @@ app.use(cookieParser());
 // 정적 파일이 필요하면 주석 해제
 // app.use(express.static(path.join(__dirname, "public")));
 
-app.get('/health', (req, res) => {
+const getHealthPayload = () => {
   const dbStateLabel = ['disconnected', 'connected', 'connecting', 'disconnecting'];
   const dbState = dbStateLabel[mongoose.connection.readyState] ?? 'unknown';
 
-  return res.status(200).json(
-    buildResponse({
-      status: 'ok',
-      uptime: process.uptime(),
-      timestamp: new Date().toISOString(),
-      dbState
-    })
-  );
+  return {
+    status: 'ok',
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+    dbState
+  };
+};
+
+app.get('/health', (req, res) => {
+  return res.status(200).json(buildResponse(getHealthPayload()));
 });
 
 app.get('/api/v1/health', (req, res) => {
-  const dbStateLabel = ['disconnected', 'connected', 'connecting', 'disconnecting'];
-  const dbState = dbStateLabel[mongoose.connection.readyState] ?? 'unknown';
-
-  return res.status(200).json(
-    buildResponse({
-      status: 'ok',
-      uptime: process.uptime(),
-      timestamp: new Date().toISOString(),
-      dbState
-    })
-  );
+  return res.status(200).json(buildResponse(getHealthPayload()));
 });
 
 // -------------------- 라우터 등록 --------------------
@@ -137,14 +132,28 @@ app.use((err, req, res, next) => {
   return res.status(statusCode).json(buildResponse(null, error));
 });
 const connectDatabase = async () => {
-  try {
-    await mongoose.connect(config.DB_URL, {
-      dbName: 'Todo-Tamers'
-    });
-  } catch (err) {
-    console.error('[MongoDB] initial connect failed:', err);
-    process.exit(1);
+  if (mongoose.connection.readyState === 1) {
+    return;
   }
+
+  if (!dbConnectPromise) {
+    dbConnectPromise = mongoose
+      .connect(config.DB_URL, {
+        dbName: 'Todo-Tamers'
+      })
+      .catch((err) => {
+        console.error('[MongoDB] initial connect failed:', err);
+        if (!isServerlessRuntime) {
+          process.exit(1);
+        }
+        throw err;
+      })
+      .finally(() => {
+        dbConnectPromise = null;
+      });
+  }
+
+  await dbConnectPromise;
 };
 
 const startServer = async () => {
@@ -174,6 +183,12 @@ const startServer = async () => {
   process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
 };
 
-startServer();
+const isDirectRun =
+  process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url;
 
+if (isDirectRun) {
+  startServer();
+}
+
+export { connectDatabase, startServer };
 export default app;

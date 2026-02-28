@@ -1,4 +1,8 @@
 {
+  "name": "back-end",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "app.js",
   "dependencies": {
     "axios": "^1.4.0",
     "bcrypt": "^5.1.1",
@@ -12,34 +16,6 @@
     "mongoose": "^7.4.3",
     "nodemon": "^3.0.1"
   },
-  "name": "back-end",
-  "version": "1.0.0",
-  "main": "app.js",
-  "type": "module",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node ./app.js",
-    "dev": "nodemon",
-    "build": "tsc",
-    "migrate:todo-category-id": "node ./scripts/migrateTodoCategoryIdToObjectId.js"
-  },
-  "devDependencies": {
-    "@types/bcrypt": "^6.0.0",
-    "@types/cookie-parser": "^1.4.10",
-    "@types/cors": "^2.8.19",
-    "@types/express": "^5.0.3",
-    "@types/jsonwebtoken": "^9.0.10",
-    "@types/node": "^24.5.2",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.9.2"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://kdt-gitlab.elice.io/sw_track/class_05/web_2_project/team14/back-end.git"
-  },
-  "author": "",
-  "license": "ISC",
-  "description": "",
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
     "@types/cookie-parser": "^1.4.10",
@@ -49,5 +25,19 @@
     "@types/node": "^25.3.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
-  }
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node ./app.js",
+    "dev": "nodemon",
+    "build": "tsc",
+    "migrate:todo-category-id": "node ./scripts/migrateTodoCategoryIdToObjectId.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://kdt-gitlab.elice.io/sw_track/class_05/web_2_project/team14/back-end.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": ""
 }
