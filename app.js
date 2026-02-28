@@ -6,6 +6,8 @@ import cookieParser from 'cookie-parser';
 import { v1 } from './src/routers/index.js';
 import authRouter from './src/routers/authRouter.js';
 import userAuthorization from './src/middlewares/userAuthorization.js';
+import { buildResponse } from './src/misc/utils.js';
+import AppError from './src/misc/AppError.js';
 
 dotenv.config();
 
@@ -73,6 +75,39 @@ app.use(cookieParser());
 app.use('/api/v1', authRouter);
 app.use('/api/v1', userAuthorization, v1);
 
+app.use((req, res, next) => {
+  next(
+    new AppError(
+      'NotFoundError',
+      404,
+      `요청 경로를 찾을 수 없습니다: ${req.method} ${req.originalUrl}`
+    )
+  );
+});
+
+app.use((err, req, res, next) => {
+  const isAppError = err instanceof AppError;
+  const statusCode = isAppError
+    ? err.httpCode
+    : Number.isInteger(err?.statusCode)
+      ? err.statusCode
+      : 500;
+
+  const error = {
+    name: isAppError ? err.name : err?.name ?? 'InternalServerError',
+    message:
+      statusCode >= 500
+        ? '서버 내부 오류가 발생했습니다.'
+        : err?.message ?? '요청 처리 중 오류가 발생했습니다.',
+    statusCode
+  };
+
+  if (statusCode >= 500) {
+    console.error(err);
+  }
+
+  return res.status(statusCode).json(buildResponse(null, error));
+});
 const connectDatabase = async () => {
   try {
     await mongoose.connect(config.DB_URL, {
