@@ -125,18 +125,6 @@ class UserService {
     }
   }
 
-  async WithdrawUserAndToken(userId) {
-    try {
-      // 회원 탈퇴 처리와 새로운 토큰 발급 수행
-      const newToken = await this.withdrawUser(userId);
-
-      return newToken; // 새로운 토큰 반환
-    } catch (error) {
-      console.error('Error withdrawing user:', error);
-      throw error; // 에러 다시 throw
-    }
-  }
-
   async withdrawUser(userId) {
     const updateResult = await this.userModel.updateMembershipStatus(
       userId,
