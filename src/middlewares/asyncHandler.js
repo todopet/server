@@ -1,16 +1,22 @@
 import { buildResponse } from '../misc/utils.js';
 
 const asyncHandler = (requestHandler) => {
-    return async (req, res, next) => {
-        try {
-            const response = await requestHandler(req, res); // 수정된 부분
-            if (!res.headersSent) {
-                return res.json(buildResponse(response));
-            }
-        } catch (err) {
-            next(err);
+  return async (req, res, next) => {
+    try {
+      // Pass next through so handlers can use it
+      const response = await requestHandler(req, res, next);
+
+      // If the handler didn't send a response but returned data, wrap it
+      if (!res.headersSent) {
+        if (typeof response !== 'undefined') {
+          return res.json(buildResponse(response));
         }
-    };
+        return next();
+      }
+    } catch (err) {
+      next(err);
+    }
+  };
 };
 
 export default asyncHandler;

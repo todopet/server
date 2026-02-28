@@ -11,14 +11,14 @@ class MyPetService {
     this.inventoryService = new InventoryService();
   }
   async getMyPet(userId) {
-    return await this.myPetModel.findByUserId(userId);
+    // 최초 로그인 등으로 보관함이 없으면 0레벨 기본 펫으로 생성
+    const existing = await this.myPetModel.findByUserId(userId);
+    if (existing) return existing;
+    return await this.addPetStorage(userId);
   }
   async getPetStorageIdByUserId(userId) {
-    const petStorage = await this.myPetModel.findByUserId(userId);
-
-    if (!petStorage) {
-      throw new Error(`petStorage no found for userId: ${userId}`);
-    }
+    // 없으면 기본 펫으로 생성 보장
+    const petStorage = await this.getMyPet(userId);
     return petStorage._id.toString();
   }
 
@@ -47,47 +47,53 @@ class MyPetService {
   async getPetByLevel(level) {
     return await this.petModel.findByLevel(level);
   }
-
   async addPetStorage(userId) {
+    // 1) userId 유효성 체크
     if (!mongoose.Types.ObjectId.isValid(userId)) {
       throw new Error('Invalid userId');
     }
 
+    // 2) 가장 낮은 레벨 펫 가져오기
     const lowestLevelPet = await this.petService.getLowestLevel();
-    lowestLevelPet.experience = 0;
 
+    // 3) 기본 펫이 없을 때 방어
+    if (!lowestLevelPet) {
+      // 여기서 에러를 던져서 어디서든 명확히 알 수 있게
+      throw new Error(
+        '기본 펫 데이터가 없습니다. seed 데이터를 먼저 넣어주세요.'
+      );
+    }
+
+    // 4) Mongoose Document 일 수도 있으니 순수 객체로 변환
+    const basePet =
+      typeof lowestLevelPet.toObject === 'function'
+        ? lowestLevelPet.toObject()
+        : { ...lowestLevelPet };
+
+    // 새 유저용 초기 경험치 세팅
+    basePet.experience = 0;
+
+    // 5) 펫 보관함 생성
     const petStorage = await this.myPetModel.create({
       userId: userId.toString(),
       pets: [
         {
-          pet: lowestLevelPet
+          pet: basePet
         }
       ]
     });
+
     return petStorage;
   }
 
   async addMyPet(userId, petId) {
     const pet = await this.petService.getPet(petId);
 
-    const petInfo = {
-      petName: pet.petName,
-      level: pet.level,
-      experience: pet.experience,
-      hunger: pet.hunger,
-      affection: pet.affection,
-      cleanliness: pet.cleanliness,
-      condition: pet.condition
-    };
+    // 펫 보관함 ID 확보(없으면 생성)
+    const petStorageId = await this.getPetStorageIdByUserId(userId);
+    const petStorage = await this.myPetModel.findByPetStorageId(petStorageId);
 
-    const [petStorageId, petStorage] = await Promise.all([
-      this.getPetStorageIdByUserId(userId),
-      this.myPetModel.findByPetStorageId(petStorageId)
-    ]);
-
-    petStorage.pets.push({
-      pet: pet
-    });
+    petStorage.pets.push({ pet });
 
     const updatedPetStorage = await this.myPetModel.update(
       petStorageId,
@@ -144,8 +150,19 @@ class MyPetService {
     }
 
     Object.assign(petToUpdate.pet, updatedFields);
+    const updatedPetStorage = await this.myPetModel.update(
+      petStorageId,
+      petStorage
+    );
+    const updatedPet = updatedPetStorage.pets.find(
+      (pet) => pet._id.toString() === petId.toString()
+    );
 
-    return petToUpdate;
+    if (!updatedPet) {
+      throw new Error('Updated pet not found in petStorage');
+    }
+
+    return updatedPet;
   }
 
   async updatePetWithItemEffect(
@@ -319,7 +336,7 @@ class MyPetService {
 
   //회원 탈퇴시 펫보관함 삭제
   async deletePetStorageByUserId(userId) {
-    const petStorage = await this.getMyPet(userId);
+    const petStorage = await this.myPetModel.findByUserId(userId);
     if (petStorage) {
       await this.myPetModel.delete(petStorage._id);
     }

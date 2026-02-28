@@ -9,6 +9,24 @@ class InventoryService {
     this.itemService = new ItemService();
   }
 
+  validateQuantity(quantity, { allowNegative = false } = {}) {
+    const normalizedQuantity = Number(quantity);
+
+    if (!Number.isInteger(normalizedQuantity)) {
+      throw new Error('Invalid quantity');
+    }
+
+    if (normalizedQuantity === 0) {
+      throw new Error('Quantity must not be zero');
+    }
+
+    if (!allowNegative && normalizedQuantity < 0) {
+      throw new Error('Quantity must be greater than zero');
+    }
+
+    return normalizedQuantity;
+  }
+
   async getInventoryById(inventoryId) {
     const inventory = await this.inventoryModel.findById(inventoryId);
 
@@ -160,183 +178,125 @@ class InventoryService {
   }
 
   async useItemAndUpdateInventory(userId, inventoryItemId, useQuantity) {
+    const quantity = this.validateQuantity(useQuantity);
+
     const inventoryId = await this.getInventoryIdByUserId(userId);
-
-    const inventory = await this.inventoryModel.findById(inventoryId);
-    if (!inventory) {
-      throw new Error('Inventory not found');
-    }
-
-    const existingItemIndex = inventory.items.findIndex(
-      (item) => item._id.toString() === inventoryItemId
+    const usedItems = await this.getInventoryItemByInventoryItemId(
+      userId,
+      inventoryItemId
     );
 
-    if (existingItemIndex !== -1) {
-      const usedItems = inventory.items[existingItemIndex];
-      // 아이템 수량 감소
-      inventory.items[existingItemIndex].quantity -= useQuantity;
+    const updatedInventory =
+      await this.inventoryModel.adjustItemQuantityByInventoryItemId(
+        inventoryId,
+        inventoryItemId,
+        -quantity,
+        true
+      );
 
-      if (inventory.items[existingItemIndex].quantity <= 0) {
-        inventory.items.splice(existingItemIndex, 1);
-      }
-
-      // 아이템 배열 업데이트 후 저장
-      await this.inventoryModel.update(inventoryId, {
-        items: inventory.items
-      });
-
-      // 사용한 아이템 정보 반환
-      return usedItems;
+    if (!updatedInventory) {
+      throw new Error('Item not found in inventory or insufficient quantity');
     }
-    throw new Error('Item not found in inventory');
+
+    await this.inventoryModel.removeNonPositiveQuantityItemByInventoryItemId(
+      inventoryId,
+      inventoryItemId
+    );
+
+    return usedItems;
   }
 
   async updateInventoryItemQuantity(inventoryId, inventoryItemId, quantity) {
-    if (isNaN(quantity)) {
-      throw new Error('Invalid quantity');
-    }
-    const inventory = await this.inventoryModel.findById(inventoryId);
-    if (!inventory) {
-      throw new Error('Inventory not found');
+    const adjustedQuantity = this.validateQuantity(quantity, {
+      allowNegative: true
+    });
+
+    const updatedInventory =
+      await this.inventoryModel.adjustItemQuantityByInventoryItemId(
+        inventoryId,
+        inventoryItemId,
+        adjustedQuantity,
+        adjustedQuantity < 0
+      );
+
+    if (!updatedInventory) {
+      throw new Error('Item not found in inventory or insufficient quantity');
     }
 
-    const existingItemIndex = inventory.items.findIndex(
-      (item) => item._id.toString() === inventoryItemId
+    return await this.inventoryModel.removeNonPositiveQuantityItemByInventoryItemId(
+      inventoryId,
+      inventoryItemId
     );
-
-    if (existingItemIndex !== -1) {
-      // 이미 있는 아이템인 경우 수량 증가
-      inventory.items[existingItemIndex].quantity += quantity;
-
-      if (inventory.items[existingItemIndex].quantity <= 0) {
-        inventory.items.splice(existingItemIndex, 1);
-      }
-
-      // 아이템 배열 업데이트 후 저장
-      await this.inventoryModel.update(inventoryId, {
-        items: inventory.items
-      });
-      return inventory;
-    }
-    throw new Error('Item not found in inventory');
   }
 
   async updateInventoryItemReward(inventoryId, inventoryItemId, quantity) {
-    if (isNaN(quantity)) {
-      throw new Error('Invalid quantity');
-    }
-    const inventory = await this.inventoryModel.findById(inventoryId);
+    const rewardQuantity = this.validateQuantity(quantity);
 
-    if (!inventory) {
-      throw new Error('Inventory not found');
-    }
-
-    const existingItemIndex = inventory.items.findIndex(
-      (item) => item.item.toString() === inventoryItemId
+    const updatedInventory = await this.inventoryModel.adjustItemQuantityByItemId(
+      inventoryId,
+      inventoryItemId,
+      rewardQuantity
     );
 
-    if (existingItemIndex !== -1) {
-      // 이미 있는 아이템인 경우 수량 증가
-      inventory.items[existingItemIndex].quantity += quantity;
-
-      if (inventory.items[existingItemIndex].quantity <= 0) {
-        inventory.items.splice(existingItemIndex, 1);
-      }
-
-      // 아이템 배열 업데이트 후 저장
-      await this.inventoryModel.update(inventoryId, {
-        items: inventory.items
-      });
-      return inventory;
+    if (!updatedInventory) {
+      throw new Error('Item not found in inventory');
     }
-    throw new Error('Item not found in inventory');
+
+    return updatedInventory;
   }
   async deleteInventoryItem(inventoryId, inventoryItemId) {
-    const inventory = await this.inventoryModel.findById(inventoryId);
-
-    if (!inventory) {
-      throw new Error('Inventory not found');
-    }
-
-    const updatedItems = inventory.items.filter(
-      (item) => item._id.toString() !== inventoryItemId
+    return await this.inventoryModel.removeInventoryItem(
+      inventoryId,
+      inventoryItemId
     );
-
-    return await this.inventoryModel.update(inventoryId, {
-      items: updatedItems
-    });
   }
 
   async addItemToInventory(inventoryId, itemId, quantity) {
-    const inventory = await this.inventoryModel.findById(inventoryId);
+    const addQuantity = this.validateQuantity(quantity);
 
-    if (!inventory) {
+    const itemInfo = await this.itemService.getItem(itemId);
+
+    if (!itemInfo) {
+      throw new Error('Item not found');
+    }
+
+    const updatedExisting = await this.inventoryModel.adjustItemQuantityByItemId(
+      inventoryId,
+      itemId,
+      addQuantity
+    );
+    if (updatedExisting) {
+      return updatedExisting;
+    }
+
+    const inserted = await this.inventoryModel.addItemIfNotExists(
+      inventoryId,
+      itemId,
+      addQuantity
+    );
+    if (inserted) {
+      return inserted;
+    }
+
+    const updatedAfterRace =
+      await this.inventoryModel.adjustItemQuantityByItemId(
+        inventoryId,
+        itemId,
+        addQuantity
+      );
+
+    if (!updatedAfterRace) {
       throw new Error('Inventory not found');
     }
 
-    const existingItemIndex = inventory.items.findIndex(
-      (item) => item.item.toString() === itemId
-    );
-
-    if (existingItemIndex !== -1) {
-      // 이미 있는 아이템인 경우 수량 증가
-      inventory.items[existingItemIndex].quantity += quantity;
-    } else {
-      // 아이템 정보 가져오기
-      const itemInfo = await this.itemService.getItem(itemId);
-
-      if (!itemInfo) {
-        throw new Error('Item not found');
-      }
-
-      // 새로운 아이템 추가
-      inventory.items.push({
-        item: itemId,
-        quantity,
-        info: itemInfo
-      });
-    }
-
-    return await this.inventoryModel.update(inventoryId, {
-      items: inventory.items
-    });
+    return updatedAfterRace;
   }
   async addSelectedItemToInventory(userId, itemId, quantity) {
+    const addQuantity = this.validateQuantity(quantity);
+
     const inventoryId = await this.getInventoryIdByUserId(userId);
 
-    const inventory = await this.inventoryModel.findById(inventoryId);
-
-    if (!inventory) {
-      throw new Error('Inventory not found');
-    }
-
-    const existingItemIndex = inventory.items.findIndex(
-      (item) => item.item.toString() === itemId
-    );
-
-    if (existingItemIndex !== -1) {
-      // 이미 있는 아이템인 경우 수량 증가
-      inventory.items[existingItemIndex].quantity += quantity;
-    } else {
-      // 아이템 정보 가져오기
-      const itemInfo = await this.itemService.getItem(itemId);
-
-      if (!itemInfo) {
-        throw new Error('Item not found');
-      }
-
-      // 새로운 아이템 추가
-      inventory.items.push({
-        item: itemId,
-        quantity,
-        info: itemInfo
-      });
-    }
-
-    // 인벤토리 업데이트 시에는 inventoryId를 사용
-    return await this.inventoryModel.update(inventoryId, {
-      items: inventory.items
-    });
+    return await this.addItemToInventory(inventoryId, itemId, addQuantity);
   }
   //회원 탈퇴시 인벤토리 삭제
   async deleteInventoryByUserId(userId) {

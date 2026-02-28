@@ -1,42 +1,41 @@
 import jwt from '../utils/jwt.js';
 import { buildResponse } from '../misc/utils.js';
 
-const userAuthorization = async (req, res, next) => {
-  // const auth = req.headers.authorization;
-  // const Token = req.cookies.token;
-  const serverToken = req.headers.token;
-  const clientToken = req.cookies.token;
-  // const userToken = auth?.split(' ')[1];
+const UNAUTHORIZED_ERROR = {
+  statusCode: 401,
+  result: 'Unauthorized',
+  reason: '로그인한 유저만 사용할 수 있는 서비스입니다.'
+};
 
-  if (
-    (!serverToken || serverToken === 'null') &&
-    (!clientToken || clientToken === 'null')
-  ) {
-    return res.json(
-      buildResponse({
-        status: 401,
-        result: 'Unauthorized',
-        reason: '로그인한 유저만 사용할 수 있는 서비스입니다.'
-      })
-    );
+const extractBearerToken = (authorizationHeader) => {
+  if (!authorizationHeader || typeof authorizationHeader !== 'string') {
+    return null;
+  }
+
+  const [scheme, token] = authorizationHeader.split(' ');
+  if (scheme !== 'Bearer' || !token) {
+    return null;
+  }
+
+  return token;
+};
+
+const userAuthorization = async (req, res, next) => {
+  const headerToken = extractBearerToken(req.headers.authorization);
+  const clientToken = req.cookies.token;
+
+  if ((!headerToken || headerToken === 'null') && (!clientToken || clientToken === 'null')) {
+    return res.status(401).json(buildResponse(null, UNAUTHORIZED_ERROR));
   }
 
   try {
-    const { userId } = jwt.verify(serverToken ?? clientToken);
+    const { userId } = jwt.verify(headerToken ?? clientToken);
 
     req.currentUserId = userId;
 
-    next();
+    return next();
   } catch (err) {
-    return res.json(
-      buildResponse({
-        status: 401,
-        result: 'Unauthorized',
-        reason: '로그인한 유저만 사용할 수 있는 서비스입니다.',
-        serverToken1: serverToken,
-        clientToken1: clientToken,
-      })
-    );
+    return res.status(401).json(buildResponse(null, UNAUTHORIZED_ERROR));
   }
 };
 

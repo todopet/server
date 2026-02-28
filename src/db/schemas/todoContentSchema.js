@@ -3,7 +3,8 @@ import { Schema } from 'mongoose';
 const todoContentSchema = new Schema(
     {
         categoryId: {
-            type: String,
+            type: Schema.Types.ObjectId,
+            ref: 'todoCategories',
             required: true
         },
         todo: {
@@ -25,5 +26,7 @@ const todoContentSchema = new Schema(
         versionKey: false
     }
 );
+
+todoContentSchema.index({ categoryId: 1, createdAt: 1 });
 
 export default todoContentSchema;
