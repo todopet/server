@@ -1,0 +1,65 @@
+[
+    {
+        "category": "todo",
+        "condition": 10,
+        "title": "계획 초보자",
+        "description": "투두 10개 완료",
+        "url": "todo10.gif"
+    },
+    {
+        "category": "todo",
+        "condition": 50,
+        "title": "프로 계획러",
+        "description": "투두 50개 완료",
+        "url": "todo50.gif"
+    },
+    {
+        "category": "todo",
+        "condition": 100,
+        "title": "투두 홀릭",
+        "description": "투두 100개 완료",
+        "url": "todo100.gif"
+    },
+    {
+        "category": "pet",
+        "condition": 1,
+        "title": "알 까기",
+        "description": "펫 1레벨 달성",
+        "url": "pet1.gif"
+    },
+    {
+        "category": "pet",
+        "condition": 5,
+        "title": "양육의 달인",
+        "description": "펫 5레벨 달성",
+        "url": "pet5.gif"
+    },
+    {
+        "category": "item",
+        "condition": 10,
+        "title": "초보 돌보미",
+        "description": "아이템 10개 사용",
+        "url": "item10.gif"
+    },
+    {
+        "category": "item",
+        "condition": 50,
+        "title": "꾸준 돌보미",
+        "description": "아이템 50개 사용",
+        "url": "item50.gif"
+    },
+    {
+        "category": "item",
+        "condition": 100,
+        "title": "아낌없이 주는 나무",
+        "description": "아이템 100개 사용",
+        "url": "item100.gif"
+    },
+    {
+        "category": "sItem",
+        "condition": 10,
+        "title": "보물 수집가",
+        "description": "특수 아이템 10개 획득",
+        "url": "sItem10.gif"
+    }
+]

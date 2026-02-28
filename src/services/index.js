@@ -7,6 +7,8 @@ import MyPetService from './myPetService.js';
 import PetService from './petService.js';
 import HistoryService from './historyService.js';
 import RewardService from './rewardService.js';
+import BadgeService from './badgeService.js';
+
 export {
     UserService,
     TodoCategoryService,
@@ -16,5 +18,6 @@ export {
     MyPetService,
     PetService,
     HistoryService,
-    RewardService
+    RewardService,
+    BadgeService
 };

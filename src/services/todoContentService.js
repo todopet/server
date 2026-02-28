@@ -44,15 +44,16 @@ class TodoContentService {
 
   async addContent(content) {
     const { categoryId, todo, date } = content;
-    const createdAt = dayjs(date).startOf('day');
-    return await todoContentModel.create({ categoryId, todo, createdAt });
+    const todoDate = dayjs(date).startOf('day');
+    return await todoContentModel.create({ categoryId, todo, todoDate });
   }
 
   async updateContent(content) {
-    const { id, userId, status } = content;
+    const { id, userId, todo, status, date } = content;
+    const todoDate = dayjs(date).startOf('day');
     // 내용 또는 상태 수정 - 히스토리 조회(해당 날짜의 히스토리 조회)
     const [result, history] = await Promise.all([
-      todoContentModel.update(content),
+      todoContentModel.update({ id, userId, todo, status, todoDate }),
       this.historyService.getHistories(userId)
     ]);
 

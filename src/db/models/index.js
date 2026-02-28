@@ -7,6 +7,7 @@ import MyPetModel from './myPetModel.js';
 import InventoryModel from './inventoryModel.js';
 import AcheiveModel from './achieveModel.js';
 import HistoryModel from './historyModel.js';
+import BadgeModel from './badgeModel.js';
 
 import { model } from 'mongoose';
 import {
@@ -24,7 +25,8 @@ export {
     PetModel,
     MyPetModel,
     InventoryModel,
-    AcheiveModel
+    AcheiveModel,
+    BadgeModel
 };
 
 // 의존성 주입 - 코드끼리 엮여있으면 분리하기 어려움 테스트도 어려움
