@@ -218,12 +218,12 @@ authRouter.post(
       await todoContentService.deleteAllTodoContentsByUserId(userId);
       await todoCategoryService.deleteAllTodoCategoiesByUserId(userId);
 
-      // WithdrawUserAndToken 메서드를 호출하여 새로운 토큰 얻기
-      const newToken = await userService.WithdrawUserAndToken(userId);
-
-      // 기존 토큰 삭제 및 새로운 토큰 저장
-      res.clearCookie('token');
-      res.cookie('token', newToken);
+      await userService.withdrawUser(userId);
+      res.clearCookie('token', {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none'
+      });
 
       res.status(200).json({ message: '탈퇴 처리 완료' });
     } catch (error) {
