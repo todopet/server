@@ -18,7 +18,8 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon --watch 'src/*' ./app.js"
+    "start": "node ./app.js",
+    "dev": "nodemon --watch src --watch app.js ./app.js"
   },
   "repository": {
     "type": "git",
