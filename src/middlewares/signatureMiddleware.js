@@ -1,8 +1,6 @@
 import { buildResponse } from '../misc/utils.js';
 import crypto from 'crypto';
 
-const SIGNATURE_SECRET = process.env.SIGNATURE_SECRET;
-const SIGNATURE_WINDOW_MS = Number(process.env.SIGNATURE_WINDOW_MS ?? 5 * 60 * 1000);
 const usedNonces = new Map();
 
 const FORBIDDEN_ERROR = {
@@ -32,9 +30,14 @@ const createPayload = (timestamp, nonce, body) => {
   return `${timestamp}.${nonce}.${bodyText}`;
 };
 
-const createSignature = (payload) => {
+const getSignatureSecret = () => process.env.SIGNATURE_SECRET;
+
+const getSignatureWindowMs = () =>
+  Number(process.env.SIGNATURE_WINDOW_MS ?? 5 * 60 * 1000);
+
+const createSignature = (payload, signatureSecret) => {
   return crypto
-    .createHmac('sha256', SIGNATURE_SECRET)
+    .createHmac('sha256', signatureSecret)
     .update(payload)
     .digest('hex');
 };
@@ -60,7 +63,10 @@ const cleanupExpiredNonces = (now) => {
 };
 
 const signatureMiddleware = (req, res, next) => {
-  if (!SIGNATURE_SECRET) {
+  const signatureSecret = getSignatureSecret();
+  const signatureWindowMs = getSignatureWindowMs();
+
+  if (!signatureSecret) {
     console.error('[Signature] SIGNATURE_SECRET is not configured.');
     return res.status(500).json(
       buildResponse(null, {
@@ -82,7 +88,7 @@ const signatureMiddleware = (req, res, next) => {
     return res.status(403).json(buildResponse(null, FORBIDDEN_ERROR));
   }
 
-  if (Math.abs(now - timestamp) > SIGNATURE_WINDOW_MS) {
+  if (Math.abs(now - timestamp) > signatureWindowMs) {
     return res.status(403).json(buildResponse(null, FORBIDDEN_ERROR));
   }
 
@@ -92,13 +98,13 @@ const signatureMiddleware = (req, res, next) => {
   }
 
   const payload = createPayload(timestamp, nonce, req.body);
-  const expectedSignature = createSignature(payload);
+  const expectedSignature = createSignature(payload, signatureSecret);
 
   if (!isValidSignature(receivedSignature, expectedSignature)) {
     return res.status(403).json(buildResponse(null, FORBIDDEN_ERROR));
   }
 
-  usedNonces.set(nonce, now + SIGNATURE_WINDOW_MS);
+  usedNonces.set(nonce, now + signatureWindowMs);
   return next();
 };
 

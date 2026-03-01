@@ -1,5 +1,5 @@
+import 'dotenv/config';
 import express from 'express';
-import dotenv from 'dotenv';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import cookieParser from 'cookie-parser';
@@ -9,8 +9,6 @@ import authRouter from './src/routers/authRouter.js';
 import userAuthorization from './src/middlewares/userAuthorization.js';
 import { buildResponse } from './src/misc/utils.js';
 import AppError from './src/misc/AppError.js';
-
-dotenv.config();
 
 const app = express();
 
