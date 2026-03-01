@@ -3,6 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import cookieParser from 'cookie-parser';
+import helmet from 'helmet';
 import { pathToFileURL } from 'url';
 import { v1 } from './src/routers/index.js';
 import authRouter from './src/routers/authRouter.js';
@@ -40,6 +41,8 @@ mongoose.connection.on('disconnected', () => {
 });
 
 // -------------------- CORS 설정 --------------------
+app.use(helmet());
+
 const allowedOrigins = [
   'http://localhost:3000', // 로컬 프론트
   'https://todopetclient.vercel.app' // 배포된 프론트

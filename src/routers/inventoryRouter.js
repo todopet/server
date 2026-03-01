@@ -3,6 +3,7 @@ import { InventoryService, MyPetService } from '../services/index.js';
 import { buildResponse } from '../misc/utils.js';
 import asyncHandler from '../middlewares/asyncHandler.js';
 import signatureMiddleware from '../middlewares/signatureMiddleware.js';
+import { signatureRateLimiter } from '../config/security.js';
 
 const inventoryRouter = Router();
 const inventoryService = new InventoryService();
@@ -49,6 +50,7 @@ inventoryRouter.get(
 //아이템 사용
 inventoryRouter.post(
   '/:inventoryItemId/put',
+  signatureRateLimiter,
   signatureMiddleware,
   asyncHandler(async (req, res, next) => {
     const { inventoryItemId } = req.params;
@@ -108,6 +110,7 @@ inventoryRouter.post(
 // 인벤토리 아이템 수량 변경
 inventoryRouter.patch(
   '/items/:inventoryItemId',
+  signatureRateLimiter,
   signatureMiddleware,
   asyncHandler(async (req, res, next) => {
     const { inventoryItemId } = req.params;

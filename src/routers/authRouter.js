@@ -9,6 +9,7 @@ import jwt from '../utils/jwt.js';
 import mongoose from 'mongoose';
 import { buildResponse } from '../misc/utils.js';
 import AppError from '../misc/AppError.js';
+import { authRateLimiter } from '../config/security.js';
 
 const authRouter = Router();
 
@@ -36,6 +37,7 @@ const getAuthConfig = () => {
 };
 
 authRouter.use(cookieParser());
+authRouter.use(authRateLimiter);
 
 //로그인
 authRouter.get('/login', (req, res) => {
