@@ -11,12 +11,17 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "types": ["node", "express"],
+    "allowImportingTsExtensions": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noEmit": true
   },
   "include": [
     "app.ts",
+    "src/**/*.ts",
+    "api/**/*.ts",
+    "scripts/**/*.ts",
+    "tests/**/*.ts",
     "src/types/**/*.d.ts"
   ],
   "exclude": [
