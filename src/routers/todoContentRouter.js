@@ -9,6 +9,7 @@ import {
   createTodoValidator,
   updateTodoValidator
 } from '../validators/todoValidator.js';
+import { signatureRateLimiter } from '../config/security.js';
 const todoContentRouter = Router();
 const todoContentService = new TodoContentService();
 
@@ -46,9 +47,10 @@ todoContentRouter.get(
 // 계획(todo) 저장
 todoContentRouter.post(
   '/',
+  signatureRateLimiter,
+  signatureMiddleware,
   createTodoValidator,
   requestValidator,
-  signatureMiddleware,
   asyncHandler(async (req, res, next) => {
     const { categoryId, todo, date } = req.body;
     const result = await todoContentService.addContent({
@@ -63,9 +65,10 @@ todoContentRouter.post(
 // 계획(todo) 수정 - 계획 처리 및 보상 지급, 히스토리 등록
 todoContentRouter.patch(
   '/:id',
+  signatureRateLimiter,
+  signatureMiddleware,
   updateTodoValidator,
   requestValidator,
-  signatureMiddleware,
   asyncHandler(async (req, res, next) => {
     const userId = req.currentUserId;
     const { id } = req.params;
