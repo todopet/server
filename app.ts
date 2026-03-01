@@ -44,17 +44,28 @@ mongoose.connection.on('disconnected', () => {
 // -------------------- CORS 설정 --------------------
 app.use(helmet());
 
-const allowedOrigins = [
-  'http://localhost:3000', // 로컬 프론트
-  'https://todopetclient.vercel.app' // 배포된 프론트
-];
+const allowedOrigins = (
+  process.env.ALLOWED_ORIGINS?.split(',').map((origin) => origin.trim()).filter(Boolean) || [
+    'http://localhost:3000', // 로컬 프론트
+    'https://todopetclient.vercel.app' // 배포된 프론트
+  ]
+);
+
+const isAllowedOrigin = (origin) => {
+  if (allowedOrigins.includes(origin)) {
+    return true;
+  }
+
+  // Vercel preview domain 허용 (todopetclient-* 포함)
+  return /^https:\/\/todopetclient(?:-[a-z0-9-]+)?\.vercel\.app$/i.test(origin);
+};
 
 const corsOptions = {
   origin(origin, callback) {
     // Postman 같은 non-browser 요청(origin 없음)은 그냥 통과
     if (!origin) return callback(null, true);
 
-    if (allowedOrigins.includes(origin)) {
+    if (isAllowedOrigin(origin)) {
       return callback(null, true);
     }
 
@@ -63,7 +74,13 @@ const corsOptions = {
   },
   credentials: true, // 쿠키 사용
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: [
+    'Content-Type',
+    'Authorization',
+    'X-Timestamp',
+    'X-Nonce',
+    'X-Signature'
+  ],
   optionsSuccessStatus: 200
 };
 

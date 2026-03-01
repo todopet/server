@@ -1,5 +1,5 @@
 // @ts-nocheck
-const REQUIRED_ENV_VARS = ['DB_URL', 'JWT_SECRET', 'SIGNATURE_SECRET'];
+const REQUIRED_ENV_VARS = ['DB_URL', 'JWT_SECRET'];
 
 const OPTIONAL_ENV_VARS = [
   'PORT',
@@ -28,6 +28,12 @@ const validateEnv = () => {
   if (missing.length > 0) {
     throw new Error(
       `[EnvValidationError] 필수 환경변수가 누락되었습니다: ${missing.join(', ')}`
+    );
+  }
+
+  if (!process.env.SIGNATURE_SECRET) {
+    console.warn(
+      '[EnvValidationWarning] SIGNATURE_SECRET이 없어 서명 보호 라우트에서 500이 발생할 수 있습니다.'
     );
   }
 };
