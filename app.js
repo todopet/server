@@ -9,6 +9,9 @@ import authRouter from './src/routers/authRouter.js';
 import userAuthorization from './src/middlewares/userAuthorization.js';
 import { buildResponse } from './src/misc/utils.js';
 import AppError from './src/misc/AppError.js';
+import { validateEnv } from './src/config/validateEnv.js';
+
+validateEnv();
 
 const app = express();
 
