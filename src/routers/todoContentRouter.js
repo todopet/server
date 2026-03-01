@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { TodoContentService } from '../services/index.js';
 import asyncHandler from '../middlewares/asyncHandler.js';
 import signatureMiddleware from '../middlewares/signatureMiddleware.js';
+import { signatureRateLimiter } from '../config/security.js';
 const todoContentRouter = Router();
 const todoContentService = new TodoContentService();
 
@@ -35,6 +36,7 @@ todoContentRouter.get(
 // 계획(todo) 저장
 todoContentRouter.post(
   '/',
+  signatureRateLimiter,
   signatureMiddleware,
   asyncHandler(async (req, res, next) => {
     const { categoryId, todo, date } = req.body;
@@ -50,6 +52,7 @@ todoContentRouter.post(
 // 계획(todo) 수정 - 계획 처리 및 보상 지급, 히스토리 등록
 todoContentRouter.patch(
   '/:id',
+  signatureRateLimiter,
   signatureMiddleware,
   asyncHandler(async (req, res, next) => {
     const userId = req.currentUserId;

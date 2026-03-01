@@ -3,6 +3,7 @@ import { MyPetService, PetService } from '../services/index.js';
 import { buildResponse } from '../misc/utils.js';
 import asyncHandler from '../middlewares/asyncHandler.js';
 import signatureMiddleware from '../middlewares/signatureMiddleware.js';
+import { signatureRateLimiter } from '../config/security.js';
 
 const myPetRouter = Router();
 const myPetService = new MyPetService();
@@ -65,6 +66,7 @@ myPetRouter.post(
 // myPet 수정 (닉네임변경)
 myPetRouter.patch(
   '/:myPetId',
+  signatureRateLimiter,
   signatureMiddleware,
   asyncHandler(async (req, res, next) => {
     const { myPetId } = req.params;
