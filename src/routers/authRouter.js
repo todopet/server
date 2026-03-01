@@ -9,6 +9,8 @@ import jwt from '../utils/jwt.js';
 import mongoose from 'mongoose';
 import { buildResponse } from '../misc/utils.js';
 import AppError from '../misc/AppError.js';
+import requestValidator from '../middlewares/requestValidator.js';
+import { oauthRedirectCodeValidator } from '../validators/authValidator.js';
 import { authRateLimiter } from '../config/security.js';
 
 const authRouter = Router();
@@ -47,74 +49,79 @@ authRouter.get('/login', (req, res) => {
   );
 });
 
-authRouter.get('/login/redirect', async (req, res, next) => {
-  try {
-    const config = getAuthConfig();
-    const { code } = req.query;
-    console.log('[LOGIN REDIRECT] code =', code);
-    console.log('[LOGIN REDIRECT] config =', {
-      ROOT: config.ROOT,
-      GOOGLE_CLIENT_ID: config.GOOGLE_CLIENT_ID,
-      GOOGLE_LOGIN_REDIRECT_URI: config.GOOGLE_LOGIN_REDIRECT_URI
-    });
+authRouter.get(
+  '/login/redirect',
+  oauthRedirectCodeValidator,
+  requestValidator,
+  async (req, res, next) => {
+    try {
+      const config = getAuthConfig();
+      const { code } = req.query;
+      console.log('[LOGIN REDIRECT] code =', code);
+      console.log('[LOGIN REDIRECT] config =', {
+        ROOT: config.ROOT,
+        GOOGLE_CLIENT_ID: config.GOOGLE_CLIENT_ID,
+        GOOGLE_LOGIN_REDIRECT_URI: config.GOOGLE_LOGIN_REDIRECT_URI
+      });
 
-    const tokenParams = new URLSearchParams({
-      code,
-      client_id: String(config.GOOGLE_CLIENT_ID),
-      client_secret: String(config.GOOGLE_CLIENT_SECRET),
-      redirect_uri: String(config.GOOGLE_LOGIN_REDIRECT_URI),
-      grant_type: 'authorization_code'
-    });
+      const tokenParams = new URLSearchParams({
+        code,
+        client_id: String(config.GOOGLE_CLIENT_ID),
+        client_secret: String(config.GOOGLE_CLIENT_SECRET),
+        redirect_uri: String(config.GOOGLE_LOGIN_REDIRECT_URI),
+        grant_type: 'authorization_code'
+      });
 
-    const resp = await axios.post(
-      String(config.GOOGLE_TOKEN_URL),
-      tokenParams,
-      {
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+      const resp = await axios.post(
+        String(config.GOOGLE_TOKEN_URL),
+        tokenParams,
+        {
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+        }
+      );
+
+      const resp2 = await axios.get(String(config.GOOGLE_USERINFO_URL), {
+        headers: {
+          Authorization: `Bearer ${resp.data.access_token}`
+        }
+      });
+
+      const userService = new UserService();
+      let user = await userService.findByGoogleId(resp2.data.id);
+
+      if (user) {
+        if (user.membershipStatus === 'withdrawn') {
+          const reason = encodeURIComponent('탈퇴한 회원입니다.');
+          return res.redirect(
+            `${config.ROOT}/#status=401&result=UnAuthorized&reason=${reason}`
+          );
+        }
+
+        if (user.membershipStatus !== 'active') {
+          const reason = encodeURIComponent('정지된 회원입니다.');
+          return res.redirect(
+            `${config.ROOT}/#status=401&result=UnAuthorized&reason=${reason}`
+          );
+        }
+      } else {
+        user = await userService.addUser(resp2.data);
       }
-    );
 
-    const resp2 = await axios.get(String(config.GOOGLE_USERINFO_URL), {
-      headers: {
-        Authorization: `Bearer ${resp.data.access_token}`
-      }
-    });
+      const token = jwt.sign(user._id);
+      res.cookie('token', token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none'
+      });
 
-    const userService = new UserService();
-    let user = await userService.findByGoogleId(resp2.data.id);
-
-    if (user) {
-      if (user.membershipStatus === 'withdrawn') {
-        const reason = encodeURIComponent('탈퇴한 회원입니다.');
-        return res.redirect(
-          `${config.ROOT}/#status=401&result=UnAuthorized&reason=${reason}`
-        );
-      }
-
-      if (user.membershipStatus !== 'active') {
-        const reason = encodeURIComponent('정지된 회원입니다.');
-        return res.redirect(
-          `${config.ROOT}/#status=401&result=UnAuthorized&reason=${reason}`
-        );
-      }
-    } else {
-      user = await userService.addUser(resp2.data);
+      console.log('[LOGIN REDIRECT] redirect to', `${config.ROOT}/todo`);
+      res.redirect(`${config.ROOT}/todo`);
+    } catch (error) {
+      console.error('[LOGIN REDIRECT ERROR]', error);
+      return next(error);
     }
-
-    const token = jwt.sign(user._id);
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'none'
-    });
-
-    console.log('[LOGIN REDIRECT] redirect to', `${config.ROOT}/todo`);
-    res.redirect(`${config.ROOT}/todo`);
-  } catch (error) {
-    console.error('[LOGIN REDIRECT ERROR]', error);
-    return next(error);
   }
-});
+);
 
 //회원가입
 authRouter.get('/signup', (req, res) => {
@@ -125,46 +132,51 @@ authRouter.get('/signup', (req, res) => {
 });
 
 //구글에 토큰 요청 및 회원 등록
-authRouter.get('/signup/redirect', async (req, res, next) => {
-  try {
-    const config = getAuthConfig();
-    const { code } = req.query;
+authRouter.get(
+  '/signup/redirect',
+  oauthRedirectCodeValidator,
+  requestValidator,
+  async (req, res, next) => {
+    try {
+      const config = getAuthConfig();
+      const { code } = req.query;
 
-    const tokenParams = new URLSearchParams({
-      code,
-      client_id: String(config.GOOGLE_CLIENT_ID),
-      client_secret: String(config.GOOGLE_CLIENT_SECRET),
-      redirect_uri: String(config.GOOGLE_SIGNUP_REDIRECT_URI),
-      grant_type: 'authorization_code'
-    });
-    const resp = await axios.post(
-      String(config.GOOGLE_TOKEN_URL),
-      tokenParams,
-      {
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-      }
-    );
-    const resp2 = await axios.get(String(config.GOOGLE_USERINFO_URL), {
-      headers: {
-        Authorization: `Bearer ${resp.data.access_token}`
-      }
-    });
+      const tokenParams = new URLSearchParams({
+        code,
+        client_id: String(config.GOOGLE_CLIENT_ID),
+        client_secret: String(config.GOOGLE_CLIENT_SECRET),
+        redirect_uri: String(config.GOOGLE_SIGNUP_REDIRECT_URI),
+        grant_type: 'authorization_code'
+      });
+      const resp = await axios.post(
+        String(config.GOOGLE_TOKEN_URL),
+        tokenParams,
+        {
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+        }
+      );
+      const resp2 = await axios.get(String(config.GOOGLE_USERINFO_URL), {
+        headers: {
+          Authorization: `Bearer ${resp.data.access_token}`
+        }
+      });
 
-    const userService = new UserService();
-    const user = await userService.addUser(resp2.data);
-    const token = jwt.sign(user._id.toString());
+      const userService = new UserService();
+      const user = await userService.addUser(resp2.data);
+      const token = jwt.sign(user._id.toString());
 
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'none'
-    });
-    res.redirect('/api/v1');
-  } catch (error) {
-    console.error('[SIGNUP REDIRECT ERROR]', error);
-    return next(error);
+      res.cookie('token', token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none'
+      });
+      res.redirect('/api/v1');
+    } catch (error) {
+      console.error('[SIGNUP REDIRECT ERROR]', error);
+      return next(error);
+    }
   }
-});
+);
 
 authRouter.post('/logout', (req, res) => {
   res.clearCookie('token');

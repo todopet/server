@@ -2,6 +2,13 @@ import { Router } from 'express';
 import { TodoContentService } from '../services/index.js';
 import asyncHandler from '../middlewares/asyncHandler.js';
 import signatureMiddleware from '../middlewares/signatureMiddleware.js';
+import requestValidator from '../middlewares/requestValidator.js';
+import {
+  todoDateRangeValidator,
+  todoIdParamValidator,
+  createTodoValidator,
+  updateTodoValidator
+} from '../validators/todoValidator.js';
 import { signatureRateLimiter } from '../config/security.js';
 const todoContentRouter = Router();
 const todoContentService = new TodoContentService();
@@ -10,6 +17,8 @@ const todoContentService = new TodoContentService();
 // TODO: 날짜별로 조회하기. 날짜 데이터 파라미터로 전달받아야 함
 todoContentRouter.get(
   '/',
+  todoDateRangeValidator,
+  requestValidator,
   asyncHandler(async (req, res, next) => {
     const userId = req.currentUserId;
     const start = req.query.start;
@@ -26,6 +35,8 @@ todoContentRouter.get(
 // 계획(todo) 단건 조회
 todoContentRouter.get(
   '/:id',
+  todoIdParamValidator,
+  requestValidator,
   asyncHandler(async (req, res, next) => {
     const { id } = req.params;
     const contents = await todoContentService.getSingleContents(id);
@@ -38,6 +49,8 @@ todoContentRouter.post(
   '/',
   signatureRateLimiter,
   signatureMiddleware,
+  createTodoValidator,
+  requestValidator,
   asyncHandler(async (req, res, next) => {
     const { categoryId, todo, date } = req.body;
     const result = await todoContentService.addContent({
@@ -54,6 +67,8 @@ todoContentRouter.patch(
   '/:id',
   signatureRateLimiter,
   signatureMiddleware,
+  updateTodoValidator,
+  requestValidator,
   asyncHandler(async (req, res, next) => {
     const userId = req.currentUserId;
     const { id } = req.params;
@@ -74,6 +89,8 @@ todoContentRouter.patch(
 // TODO 계획(todo) 삭제
 todoContentRouter.delete(
   '/:id',
+  todoIdParamValidator,
+  requestValidator,
   asyncHandler(async (req, res, next) => {
     const { id } = req.params;
     const result = await todoContentService.deleteContent(id);
