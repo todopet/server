@@ -3,6 +3,12 @@ import { HistoryService, UserService } from '../services/index.js';
 import { buildResponse } from '../misc/utils.js';
 import asyncHandler from '../middlewares/asyncHandler.js';
 import userAuthorization from '../middlewares/userAuthorization.js';
+import requestValidator from '../middlewares/requestValidator.js';
+import {
+  rankCountValidator,
+  nicknameValidator,
+  membershipStatusValidator
+} from '../validators/userValidator.js';
 
 const userRouter = Router();
 const userService = new UserService();
@@ -11,6 +17,8 @@ const historyService = new HistoryService();
 // 랭킹 순위 전달 받기.
 userRouter.get(
   '/rank/:count',
+  rankCountValidator,
+  requestValidator,
   asyncHandler(async (req, res, next) => {
     const { count } = req.params;
     const ranking = await historyService.getRanking(count);
@@ -41,6 +49,8 @@ userRouter.get(
 // 회원 닉네임 변경
 userRouter.patch(
   '/myInfo',
+  nicknameValidator,
+  requestValidator,
   asyncHandler(async (req, res, next) => {
     const userId = req.currentUserId;
     const { nickname } = req.body;
@@ -52,6 +62,8 @@ userRouter.patch(
 // 회원 상태 변경
 userRouter.patch(
   '/myStatus',
+  membershipStatusValidator,
+  requestValidator,
   asyncHandler(async (req, res, next) => {
     const userId = req.currentUserId;
     const { membershipStatus } = req.body;
